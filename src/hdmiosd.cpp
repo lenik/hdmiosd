@@ -85,9 +85,12 @@ class HdmiosdApp : public wxApp {
             return false;
         }
         wxInitAllImageHandlers();
-        /* Window shows immediately; discovery + VCP reads run in background. */
+        /* present() maps immediately; DDC scan starts on a worker via CallAfter. */
         auto* frame = new OsdFrame(list, settings, filter);
-        frame->Show(true);
+        frame->present();
+        wxSize sz = frame->GetSize();
+        loginfo_fmt("OSD window shown (IsShown=%d size=%dx%d)", frame->IsShown() ? 1 : 0, sz.x,
+                    sz.y);
         return true;
     }
 };

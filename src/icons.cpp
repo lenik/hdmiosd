@@ -51,10 +51,22 @@ wxBitmap load_tabler_icon(const std::string& stem, int size, const wxColour& tin
 }
 
 wxBitmap load_app_icon(int size) {
-    auto bmp = imageLoadAsset("icons/hdmiosd.svg", size, size);
-    if (bmp) {
-        return *bmp;
+    /* Prefer raster embeds — SVG must be present in assets.zip and supported. */
+    const char* png_paths[] = {
+        "icons/hdmiosd.png",
+        "icons/48/hdmiosd.png",
+        "icons/32/hdmiosd.png",
+        nullptr,
+    };
+    for (const char** p = png_paths; *p; ++p) {
+        auto bmp = imageLoadAsset(*p, size, size);
+        if (bmp) {
+            return *bmp;
+        }
     }
-    /* Fallback: compose from tabler */
+    auto svg = imageLoadAsset("icons/hdmiosd.svg", size, size);
+    if (svg) {
+        return *svg;
+    }
     return load_tabler_icon("device-desktop", size, wxColour(255, 255, 255));
 }

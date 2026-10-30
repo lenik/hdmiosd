@@ -10,6 +10,7 @@
 #include "icons.hpp"
 
 #include <bas/locale/i18n.h>
+#include <bas/log/uselog.h>
 
 #include <wx/dcbuffer.h>
 #include <wx/display.h>
@@ -66,10 +67,13 @@ wxEND_EVENT_TABLE()
 
 OsdFrame::OsdFrame(DisplayList* list, Settings* settings, const std::string& device_filter)
     : wxFrame(nullptr, wxID_ANY, "hdmiosd", wxDefaultPosition, wxSize(640, 480),
-              wxBORDER_NONE | wxSTAY_ON_TOP | wxFRAME_TOOL_WINDOW),
+              /* Avoid wxFRAME_TOOL_WINDOW — many WMs never map it as a visible OSD. */
+              wxBORDER_NONE | wxSTAY_ON_TOP),
       list_(list), settings_(settings), device_filter_(device_filter),
       alive_(std::make_shared<std::atomic<bool>>(true)) {
     SetBackgroundStyle(wxBG_STYLE_PAINT);
+    /* Keep the WM from collapsing an unrealized borderless frame to 1×1. */
+    SetMinClientSize(wxSize(320, 240));
     palette_ = theme_default_dark();
     if (settings_ && !settings_->app.theme.empty()) {
         theme_load(settings_->app.theme, palette_);
@@ -79,20 +83,58 @@ OsdFrame::OsdFrame(DisplayList* list, Settings* settings, const std::string& dev
         wxIcon icon;
         icon.CopyFromBitmap(app_ic);
         SetIcon(icon);
+    } else {
+        logwarn("app icon not loaded from assets");
     }
     canvas_ = new OsdCanvas(this);
     auto* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(canvas_, 1, wxEXPAND);
     SetSizer(sizer);
     debounce_.SetOwner(this);
-    apply_window_placement();
+    int cw = settings_ && settings_->app.width > 0 ? settings_->app.width : 640;
+    int ch = settings_ && settings_->app.height > 0 ? settings_->app.height : 480;
+    SetClientSize(cw, ch);
+    /* Shell UI only here — Show + place + scan happen in present() after map. */
     show_shell_ui(_("Scanning displays…"));
-    start_async_scan();
     canvas_->SetFocus();
 }
 
+void OsdFrame::present() {
+    /* wxGTK: SetTransparent must run before Show. It can recreate the X
+       window as 1×1, so re-apply size/position immediately after mapping. */
+    auto& a = settings_->app;
+    int cw = a.width > 0 ? a.width : 640;
+    int ch = a.height > 0 ? a.height : 480;
+    SetMinClientSize(wxSize(320, 240));
+    SetClientSize(cw, ch);
+    SetTransparent((wxByte)std::clamp((int)(a.opacity * 255), 30, 255));
+    Show(true);
+    apply_window_placement();
+    Raise();
+    SetFocus();
+    if (canvas_) {
+        canvas_->SetFocus();
+        canvas_->Refresh(false);
+        canvas_->Update();
+    }
+    /* Discover only after the shell UI is mapped — never block Show. */
+    CallAfter([this]() {
+        if (!alive_ || !alive_->load()) {
+            return;
+        }
+        start_async_scan();
+    });
+}
+
 OsdFrame::~OsdFrame() {
-    cancel_background();
+    ++load_gen_;
+    if (alive_) {
+        alive_->store(false);
+    }
+    /* Detach only — joining here can hang if an I2C probe is stuck. */
+    if (worker_.joinable()) {
+        worker_.detach();
+    }
 }
 
 void OsdFrame::set_status(const std::string& s) {
@@ -142,11 +184,18 @@ void OsdFrame::set_cat_index(int i) {
 
 void OsdFrame::apply_window_placement() {
     auto& a = settings_->app;
-    SetClientSize(a.width > 0 ? a.width : 640, a.height > 0 ? a.height : 480);
-    SetTransparent((wxByte)std::clamp((int)(a.opacity * 255), 30, 255));
+    int cw = a.width > 0 ? a.width : 640;
+    int ch = a.height > 0 ? a.height : 480;
+    /* Set size before and after Show — wxGTK often ignores pre-map SetClientSize
+       on borderless frames (ends up as a 1×1 invisible window). */
+    SetMinClientSize(wxSize(320, 240));
+    SetClientSize(cw, ch);
+    SetSize(GetSize());
+    Layout();
 
     /* Prefer the display under the mouse (same screen the user is on). */
-    int disp_idx = wxDisplay::GetFromPoint(wxGetMousePosition());
+    wxPoint mouse = wxGetMousePosition();
+    int disp_idx = wxDisplay::GetFromPoint(mouse);
     if (disp_idx == wxNOT_FOUND) {
         disp_idx = wxDisplay::GetFromWindow(this);
     }
@@ -158,8 +207,14 @@ void OsdFrame::apply_window_placement() {
     if (geo.width <= 0) {
         geo = disp.GetGeometry();
     }
-    int w, h;
+    int w = cw, h = ch;
     GetSize(&w, &h);
+    if (w < 320 || h < 240) {
+        /* Last resort if the WM still collapsed us. */
+        w = cw;
+        h = ch;
+        SetSize(w, h);
+    }
     int x = geo.x + (geo.width - w) / 2;
     int y = geo.y + (geo.height - h) / 2;
     if (a.have_left) {
@@ -172,7 +227,24 @@ void OsdFrame::apply_window_placement() {
     } else if (a.have_bottom) {
         y = geo.y + geo.height - h - a.margin_bottom;
     }
-    Move(x, y);
+    /* Clamp into the chosen display so margins cannot push us off-screen. */
+    if (x < geo.x) {
+        x = geo.x;
+    }
+    if (y < geo.y) {
+        y = geo.y;
+    }
+    if (x + w > geo.x + geo.width) {
+        x = geo.x + std::max(0, geo.width - w);
+    }
+    if (y + h > geo.y + geo.height) {
+        y = geo.y + std::max(0, geo.height - h);
+    }
+    SetSize(x, y, w, h);
+    loginfo_fmt("OSD placement: display=%d mouse=(%d,%d) geo=%dx%d+%d+%d "
+                "window=%dx%d+%d+%d opacity=%.2f shown=%d",
+                disp_idx, mouse.x, mouse.y, geo.width, geo.height, geo.x, geo.y, w, h, x, y,
+                a.opacity, IsShown() ? 1 : 0);
 }
 
 void OsdFrame::apply_theme(const std::string& path) {
@@ -336,8 +408,10 @@ void OsdFrame::cancel_background() {
     if (alive_) {
         alive_->store(false);
     }
+    /* Never join on the UI thread — a stuck I2C probe would freeze the window.
+       Cancelled workers exit via load_gen_/alive_ checks and self-detach. */
     if (worker_.joinable()) {
-        worker_.join();
+        worker_.detach();
     }
     alive_ = std::make_shared<std::atomic<bool>>(true);
 }
@@ -504,15 +578,18 @@ void OsdFrame::start_async_scan() {
     loading_ = true;
     auto alive = alive_;
     std::string filter = device_filter_;
+    loginfo("async scan: starting background discovery");
     worker_ = std::thread([this, alive, gen, filter]() {
         auto cands = DisplayList::enumerate_candidates(filter);
         size_t found = 0;
-        for (const auto& c : cands) {
+        for (size_t i = 0; i < cands.size(); i++) {
             if (!alive->load() || gen != load_gen_.load()) {
+                loginfo("async scan: cancelled");
                 return;
             }
+            loginfo_fmt("async scan: probe %zu/%zu", i + 1, cands.size());
             HdmiDisplay d;
-            if (!DisplayList::probe_candidate(c, d)) {
+            if (!DisplayList::probe_candidate(cands[i], d)) {
                 continue;
             }
             ++found;
@@ -525,6 +602,7 @@ void OsdFrame::start_async_scan() {
                 ui_on_display_found(std::move(*holder), gen);
             });
         }
+        loginfo_fmt("async scan: done, found=%zu", found);
         CallAfter([this, alive, gen, found]() {
             if (!alive->load() || gen != load_gen_.load()) {
                 return;
@@ -555,15 +633,17 @@ void OsdFrame::start_async_feature_query() {
     int disp = current_display_;
     std::string path = list_->at(disp).i2c_path;
     VcpCaps caps = list_->at(disp).caps;
+    loginfo_fmt("async features: reading VCP from %s", path.c_str());
 
     if (worker_.joinable()) {
-        worker_.join();
+        worker_.detach();
     }
     worker_ = std::thread([this, alive, gen, path, caps, disp]() mutable {
         HdmiDisplay probe;
         probe.i2c_path = path;
         probe.caps = caps;
         if (probe.bus.open(path) != DdcErr::Ok) {
+            logwarn_fmt("async features: cannot open %s", path.c_str());
             CallAfter([this, alive, gen]() {
                 if (!alive->load() || gen != load_gen_.load()) {
                     return;
@@ -585,15 +665,21 @@ void OsdFrame::start_async_feature_query() {
             color_temp_step_ = step_val;
         });
 
+        int added = 0;
         for (const auto& feat : vcp_features()) {
             if (!alive->load() || gen != load_gen_.load()) {
                 probe.bus.close();
+                loginfo("async features: cancelled");
                 return;
             }
+            logdebug_fmt("async features: try 0x%02X %s", feat.code, feat.name);
             OsdItem it;
             if (!make_item_from_feat(probe, feat, it)) {
                 continue;
             }
+            ++added;
+            loginfo_fmt("async features: + 0x%02X %s = %u", feat.code, feat.name,
+                        (unsigned)it.current);
             auto* heap = new OsdItem(std::move(it));
             CallAfter([this, alive, gen, heap]() {
                 std::unique_ptr<OsdItem> holder(heap);
@@ -604,6 +690,7 @@ void OsdFrame::start_async_feature_query() {
             });
         }
         probe.bus.close();
+        loginfo_fmt("async features: done, %d controls", added);
         CallAfter([this, alive, gen]() {
             if (!alive->load() || gen != load_gen_.load()) {
                 return;
@@ -636,6 +723,10 @@ void OsdFrame::refresh_all() {
 
 void OsdFrame::on_debounce(wxTimerEvent&) { flush_pending(); }
 
+static bool is_margin_app(int app_id) {
+    return app_id == APP_LEFT || app_id == APP_RIGHT || app_id == APP_TOP || app_id == APP_BOTTOM;
+}
+
 void OsdFrame::flush_pending() {
     if (pending_item_ < 0 || pending_item_ >= (int)items_.size()) {
         return;
@@ -643,6 +734,7 @@ void OsdFrame::flush_pending() {
     OsdItem& it = items_[pending_item_];
     if (it.app_id >= 0) {
         auto& a = settings_->app;
+        const bool margin = is_margin_app(it.app_id);
         switch (it.app_id) {
         case APP_OPACITY:
             a.opacity = pending_value_ / 100.0;
@@ -660,30 +752,30 @@ void OsdFrame::flush_pending() {
             a.margin_left = pending_value_;
             a.have_left = true;
             a.have_right = false;
-            apply_window_placement();
             break;
         case APP_RIGHT:
             a.margin_right = pending_value_;
             a.have_right = true;
             a.have_left = false;
-            apply_window_placement();
             break;
         case APP_TOP:
             a.margin_top = pending_value_;
             a.have_top = true;
             a.have_bottom = false;
-            apply_window_placement();
             break;
         case APP_BOTTOM:
             a.margin_bottom = pending_value_;
             a.have_bottom = true;
             a.have_top = false;
-            apply_window_placement();
             break;
         }
         it.current = pending_value_;
         settings_->save();
         set_status(_("App OSD updated"));
+        if (margin) {
+            /* Move the OSD only — never warp or synthesize pointer motion. */
+            apply_window_placement();
+        }
         canvas_->Refresh(false);
         return;
     }
@@ -753,7 +845,9 @@ void OsdFrame::queue_set_item(int idx, uint16_t value, bool debounce, bool recor
     }
     pending_item_ = idx;
     pending_value_ = value;
-    if (debounce) {
+    /* Margins reposition the window — apply immediately so the pointer can be
+       pinned to the exact slider thumb for this value. */
+    if (debounce && !is_margin_app(it.app_id)) {
         debounce_.Start(100, wxTIMER_ONE_SHOT);
     } else {
         debounce_.Stop();
@@ -1278,10 +1372,20 @@ void OsdCanvas::on_left_down(wxMouseEvent& ev) {
     if (it.kind == VcpKind::Continuous && ev.GetX() >= it.bar_x0 && ev.GetX() <= it.bar_x1) {
         double frac = (ev.GetX() - it.bar_x0) / (it.bar_x1 - it.bar_x0);
         uint16_t maxv = it.max ? it.max : 100;
-        uint16_t v = (uint16_t)(frac * maxv + 0.5);
+        uint16_t v = (uint16_t)std::lround(frac * maxv);
         it.hist.push(it.current);
         drag_item_ = idx;
         drag_hist_pushed_ = true;
+        margin_drag_ = is_margin_app(it.app_id);
+        if (margin_drag_) {
+            margin_drag_screen0_ = wxGetMousePosition();
+            margin_drag_value0_ = v;
+            margin_drag_bar_w_ = std::max(1, (int)(it.bar_x1 - it.bar_x0));
+            margin_drag_max_ = maxv;
+        }
+        if (!HasCapture()) {
+            CaptureMouse();
+        }
         frame_->queue_set_item(idx, v, true, false);
         return;
     }
@@ -1291,12 +1395,13 @@ void OsdCanvas::on_left_down(wxMouseEvent& ev) {
 void OsdCanvas::on_left_up(wxMouseEvent&) {
     if (win_drag_) {
         win_drag_ = false;
-        if (HasCapture()) {
-            ReleaseMouse();
-        }
     }
     drag_item_ = -1;
     drag_hist_pushed_ = false;
+    margin_drag_ = false;
+    if (HasCapture()) {
+        ReleaseMouse();
+    }
 }
 
 void OsdCanvas::on_motion(wxMouseEvent& ev) {
@@ -1306,17 +1411,32 @@ void OsdCanvas::on_motion(wxMouseEvent& ev) {
         frame_->Move(win_drag_origin_ + (cur - win_drag_start_));
         return;
     }
-    if (drag_item_ < 0 || !ev.Dragging() || !ev.LeftIsDown()) {
+    if (drag_item_ < 0 || !ev.LeftIsDown()) {
         return;
     }
     OsdItem& it = frame_->items()[drag_item_];
     if (it.kind != VcpKind::Continuous) {
         return;
     }
-    double frac = (ev.GetX() - it.bar_x0) / (it.bar_x1 - it.bar_x0);
-    frac = std::clamp(frac, 0.0, 1.0);
-    uint16_t maxv = it.max ? it.max : 100;
-    uint16_t v = (uint16_t)(frac * maxv + 0.5);
+    uint16_t v;
+    if (margin_drag_) {
+        /* Screen Δx only — window Move must not change the sampled value. */
+        int dx = wxGetMousePosition().x - margin_drag_screen0_.x;
+        int iv = (int)margin_drag_value0_ +
+                 (int)std::lround((double)dx * (double)margin_drag_max_ / (double)margin_drag_bar_w_);
+        if (iv < 0) {
+            iv = 0;
+        }
+        if (iv > (int)margin_drag_max_) {
+            iv = margin_drag_max_;
+        }
+        v = (uint16_t)iv;
+    } else {
+        double frac = (ev.GetX() - it.bar_x0) / (it.bar_x1 - it.bar_x0);
+        frac = std::clamp(frac, 0.0, 1.0);
+        uint16_t maxv = it.max ? it.max : 100;
+        v = (uint16_t)std::lround(frac * maxv);
+    }
     frame_->queue_set_item(drag_item_, v, true, false);
 }
 

@@ -69,8 +69,22 @@ DdcErr DdcBus::open(const std::string& i2c_path) {
     if (dash != std::string::npos) {
         busno_ = atoi(i2c_path.c_str() + dash + 1);
     }
-    fd_ = ::open(i2c_path.c_str(), O_RDWR);
-    return fd_ < 0 ? DdcErr::Open : DdcErr::Ok;
+    fd_ = ::open(i2c_path.c_str(), O_RDWR | O_CLOEXEC);
+    if (fd_ < 0) {
+        return DdcErr::Open;
+    }
+#ifndef I2C_TIMEOUT
+#define I2C_TIMEOUT 0x0702
+#endif
+#ifndef I2C_RETRIES
+#define I2C_RETRIES 0x0701
+#endif
+    /* Keep probes snappy: timeout unit is 10 ms; avoid indefinite I2C hangs. */
+    unsigned long timeout_units = 20; /* 200 ms */
+    unsigned long retries = 1;
+    (void)ioctl(fd_, I2C_TIMEOUT, timeout_units);
+    (void)ioctl(fd_, I2C_RETRIES, retries);
+    return DdcErr::Ok;
 }
 
 void DdcBus::close() {

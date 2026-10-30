@@ -1,3 +1,18 @@
+hdmiosd (0.2.1) unstable; urgency=medium
+
+  * Embed hdmiosd.png in assets.zip; set I2C timeouts so probe cannot
+    hang the UI thread.
+  * Prefer PNG app icon; rebuild assets when files change; detach
+    cancelled worker threads.
+  * Drop wxFRAME_TOOL_WINDOW so the OSD actually maps; Raise on show;
+    clamp placement on-screen.
+  * Log enumeration/probe/VCP steps under -v/-vvv (including --list).
+  * Fix 1×1 invisible window: SetTransparent/size only after Show;
+    defer DDC scan until the shell UI has mapped.
+  * Margin drag uses screen Δx only; never WarpPointer / UIActionSimulator.
+
+ -- Lenik (谢继雷) <lenik@bodz.net>  Fri, 30 Oct 2026 15:47:21 +0800
+
 hdmiosd (0.2.0) unstable; urgency=medium
 
   * Refactor to C++ / wxWidgets with canvas OSD and embedded assets.

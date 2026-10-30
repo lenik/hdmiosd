@@ -56,6 +56,9 @@ class OsdFrame : public wxFrame {
     OsdFrame(DisplayList* list, Settings* settings, const std::string& device_filter);
     ~OsdFrame() override;
 
+    /* Call after Show(): size/opacity/position, then kick off background scan. */
+    void present();
+
     void rebuild_items(); /* start/restart async feature query for current display */
     void refresh_displays();
     void refresh_all(); /* rediscover displays + re-read controls */
@@ -142,6 +145,13 @@ class OsdCanvas : public wxPanel {
     bool win_drag_ = false;
     wxPoint win_drag_origin_;
     wxPoint win_drag_start_;
+    /* Margin: sample with screen Δx so window Move cannot feed back into value.
+       Never warp / synthesize pointer motion. */
+    bool margin_drag_ = false;
+    wxPoint margin_drag_screen0_;
+    uint16_t margin_drag_value0_ = 0;
+    int margin_drag_bar_w_ = 1;
+    uint16_t margin_drag_max_ = 100;
 
     void on_paint(wxPaintEvent&);
     void on_left_down(wxMouseEvent&);

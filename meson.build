@@ -68,13 +68,28 @@ lib_objects = []
 assets_dir = meson.current_source_dir() / 'assets'
 assets_src = 'src/assets.s'
 if fs.exists(assets_dir) and fs.exists(assets_src)
+    # Depend on asset files so icons/SVG/PNG edits rebuild the zip.
+    assets_files = run_command(
+        'bash',
+        '-c',
+        'cd "$1" && find . -type f | sort',
+        'find-assets',
+        assets_dir,
+        check: true,
+    ).stdout().strip().split('\n')
+    assets_inputs = []
+    foreach rel : assets_files
+        if rel != ''
+            assets_inputs += [assets_dir / rel]
+        endif
+    endforeach
     assets_zip = custom_target(
         'assets_zip',
         output: 'assets.zip',
-        input: [],
+        input: assets_inputs,
         command: [
             'sh',
-            '-c', 'dst=$(readlink -f "@1@"); cd "@0@" && zip -qr "$dst" .'.format(assets_dir, '@OUTPUT@'),
+            '-c', 'dst=$(readlink -f "@OUTPUT@"); cd "@0@" && zip -qr "$dst" .'.format(assets_dir),
         ],
         build_by_default: true,
         install: false,

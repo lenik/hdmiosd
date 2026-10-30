@@ -6,6 +6,8 @@
 
 #include "display.hpp"
 
+#include <bas/log/uselog.h>
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -160,9 +162,13 @@ bool DisplayList::probe_candidate(const I2cCandidate& c, HdmiDisplay& out) {
         fill_drm_from_busno(out);
     }
 
+    loginfo_fmt("probe %s (%s): opening", c.i2c_path.c_str(),
+                c.drm_name.empty() ? "-" : c.drm_name.c_str());
     if (out.bus.open(c.i2c_path) != DdcErr::Ok) {
+        loginfo_fmt("probe %s: open failed", c.i2c_path.c_str());
         return false;
     }
+    logdebug_fmt("probe %s: reading EDID", c.i2c_path.c_str());
     if (out.bus.read_edid(out.edid) == DdcErr::Ok) {
         out.edid_ok = true;
         edid_mfg(out.edid, out.mfg);
@@ -177,17 +183,28 @@ bool DisplayList::probe_candidate(const I2cCandidate& c, HdmiDisplay& out) {
                 edid_text(desc, out.serial);
             }
         }
+        loginfo_fmt("probe %s: EDID ok model=%s mfg=%s", c.i2c_path.c_str(),
+                    out.model.c_str(), out.mfg.c_str());
+    } else {
+        loginfo_fmt("probe %s: EDID failed (continuing)", c.i2c_path.c_str());
     }
+    logdebug_fmt("probe %s: DDC detect", c.i2c_path.c_str());
     if (out.bus.detect() != DdcErr::Ok) {
+        loginfo_fmt("probe %s: no DDC/CI", c.i2c_path.c_str());
         out.bus.close();
         return false;
     }
     out.ddc_ok = true;
+    loginfo_fmt("probe %s: reading capabilities", c.i2c_path.c_str());
     std::string caps;
     if (out.bus.capabilities(caps) > 0) {
         vcp_caps_parse(out.caps, caps);
+        loginfo_fmt("probe %s: capabilities %zu bytes", c.i2c_path.c_str(), caps.size());
+    } else {
+        loginfo_fmt("probe %s: capabilities empty/unavailable", c.i2c_path.c_str());
     }
     out.bus.close();
+    loginfo_fmt("probe %s: ok → %s", c.i2c_path.c_str(), out.label().c_str());
     return true;
 }
 
@@ -324,11 +341,13 @@ void DisplayList::dedupe_candidates(std::vector<I2cCandidate>& cands) {
 std::vector<I2cCandidate> DisplayList::enumerate_candidates(const std::string& filter_dev) {
     std::vector<I2cCandidate> out;
     if (!filter_dev.empty()) {
+        loginfo_fmt("enumerate: filter=%s", filter_dev.c_str());
         collect_from_filter(out, filter_dev);
         if (out.empty()) {
             std::vector<I2cCandidate> all;
             collect_drm(all, {});
             if (all.empty()) {
+                loginfo("enumerate: no DRM hits, scanning /dev/i2c-*");
                 collect_all_i2c(all);
             }
             for (auto& c : all) {
@@ -339,12 +358,19 @@ std::vector<I2cCandidate> DisplayList::enumerate_candidates(const std::string& f
             }
         }
     } else {
+        loginfo("enumerate: scanning DRM connected connectors");
         collect_drm(out, {});
         if (out.empty()) {
+            loginfo("enumerate: no DRM hits, scanning /dev/i2c-*");
             collect_all_i2c(out);
         }
     }
     dedupe_candidates(out);
+    loginfo_fmt("enumerate: %zu candidate bus(es)", out.size());
+    for (size_t i = 0; i < out.size(); i++) {
+        loginfo_fmt("  [%zu] %s (%s)", i, out[i].i2c_path.c_str(),
+                    out[i].drm_name.empty() ? "-" : out[i].drm_name.c_str());
+    }
     return out;
 }
 
@@ -375,8 +401,9 @@ void DisplayList::discover_from_filter(const std::string& filter) {
 int DisplayList::discover(const std::string& filter_dev) {
     clear();
     auto cands = enumerate_candidates(filter_dev);
-    for (const auto& c : cands) {
-        add_i2c_candidate(c.i2c_path, c.drm_name);
+    for (size_t i = 0; i < cands.size(); i++) {
+        loginfo_fmt("discover: probing %zu/%zu", i + 1, cands.size());
+        add_i2c_candidate(cands[i].i2c_path, cands[i].drm_name);
     }
     /* Filter may have matched path/model after probe — re-filter if needed. */
     if (!filter_dev.empty() && !items_.empty()) {
