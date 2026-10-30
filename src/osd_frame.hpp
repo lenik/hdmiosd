@@ -42,6 +42,7 @@ struct OsdItem {
     int choice_idx = -1;
     HistStack hist;
     int app_id = -1;
+    std::string description; /* info pane; English msgid or translated later */
     double row_y = 0;
     double bar_x0 = 0, bar_x1 = 0, bar_y0 = 0, bar_y1 = 0;
     double undo_x0 = 0, undo_x1 = 0, reset_x0 = 0, reset_x1 = 0;

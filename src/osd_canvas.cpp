@@ -49,10 +49,15 @@ void OsdCanvas::on_paint(wxPaintEvent&) {
     dc.SetBackground(wxBrush(pal.editor_bg));
     dc.Clear();
 
-    draw_round_rect(dc, 1, 1, sz.x - 2, sz.y - 2, 6, pal.editor_bg, &pal.border);
+    /* Edge-to-edge chrome — OSD style, not floated desktop panels. */
+    dc.SetPen(wxPen(pal.border, 1));
+    dc.SetBrush(*wxTRANSPARENT_BRUSH);
+    dc.DrawRectangle(0, 0, sz.x, sz.y);
 
-    /* titleBar */
-    draw_round_rect(dc, 2, 2, sz.x - 4, TOP_H, 0, pal.panel_bg);
+    /* titleBar — full width, flush to top */
+    draw_round_rect(dc, 0, 0, sz.x, TOP_H, 0, pal.panel_bg);
+    dc.SetPen(wxPen(pal.border, 1));
+    dc.DrawLine(0, TOP_H - 1, sz.x, TOP_H - 1);
     dc.SetTextForeground(pal.title_fg);
     dc.SetFont(osd_typeface(OsdTypeRole::Title));
     wxString title = tr("No display");
@@ -63,7 +68,7 @@ void OsdCanvas::on_paint(wxPaintEvent&) {
         title += wxString::FromUTF8(" — ");
         title += wxString::FromUTF8(_("loading"));
     }
-    int title_ty = text_vcenter_y(dc, 2, TOP_H);
+    int title_ty = text_vcenter_y(dc, 0, TOP_H);
     dc.DrawText(title, PAD, title_ty);
 
     auto measure_top_btn = [&](const wxString& label) {
@@ -73,15 +78,16 @@ void OsdCanvas::on_paint(wxPaintEvent&) {
         return std::max(72, (int)tw + 36); /* icon + padding */
     };
     auto draw_top_btn = [&](int x, int w, const wxString& label, const char* icon) {
-        draw_round_rect(dc, x, 10, w, 28, 4, pal.button_bg, &pal.button_border);
+        int by = (TOP_H - 28) / 2;
+        draw_round_rect(dc, x, by, w, 28, 2, pal.button_bg, &pal.button_border);
         wxBitmap bmp = load_tabler_icon(icon, 16, pal.button_fg);
-        int iy = 10 + (28 - 16) / 2;
+        int iy = by + (28 - 16) / 2;
         if (bmp.IsOk()) {
             dc.DrawBitmap(bmp, x + 6, iy, true);
         }
         dc.SetTextForeground(pal.button_fg);
         dc.SetFont(osd_typeface(OsdTypeRole::Button));
-        int ty = text_vcenter_y(dc, 10, 28);
+        int ty = text_vcenter_y(dc, by, 28);
         dc.DrawText(label, x + 26, ty);
     };
     wxString refresh_lab = tr("Refresh");
@@ -93,11 +99,13 @@ void OsdCanvas::on_paint(wxPaintEvent&) {
     draw_top_btn(refresh_x_, refresh_w_, refresh_lab, "refresh");
     draw_top_btn(theme_x_, theme_w_, theme_lab, "palette");
 
-    /* sideBar + editor: flush (no gap between); padding is inside each pane. */
-    int side_x = PAD;
-    int side_y = TOP_H + PAD;
-    int side_h = sz.y - TOP_H - 2 * PAD - 22;
-    draw_round_rect(dc, side_x, side_y, SIDEBAR_W, side_h, 4, pal.sidebar_bg, &pal.border);
+    /* sideBar + editor: flush under title / above status; no outer panel gaps. */
+    int side_x = 0;
+    int side_y = TOP_H;
+    int side_h = sz.y - TOP_H - STATUS_H;
+    draw_round_rect(dc, side_x, side_y, SIDEBAR_W, side_h, 0, pal.sidebar_bg);
+    dc.SetPen(wxPen(pal.border, 1));
+    dc.DrawLine(side_x + SIDEBAR_W - 1, side_y, side_x + SIDEBAR_W - 1, side_y + side_h);
 
     dc.SetFont(osd_typeface(OsdTypeRole::Sidebar));
     const auto& cats = frame_->visible_cats();
@@ -106,7 +114,7 @@ void OsdCanvas::on_paint(wxPaintEvent&) {
         int iy = side_y + INNER_PAD + v * 34;
         bool sel = v == frame_->cat_index();
         if (sel) {
-            draw_round_rect(dc, side_x + INNER_PAD / 2, iy, SIDEBAR_W - INNER_PAD, 30, 3,
+            draw_round_rect(dc, side_x + INNER_PAD / 2, iy, SIDEBAR_W - INNER_PAD, 30, 2,
                             pal.selection_bg);
         }
         wxColour row_fg = sel ? pal.selection_fg : pal.sidebar_fg;
@@ -120,24 +128,25 @@ void OsdCanvas::on_paint(wxPaintEvent&) {
         dc.DrawText(lab, side_x + INNER_PAD + 22, text_vcenter_y(dc, iy, 30));
     }
 
-    /* editor / content pane — abut sidebar (no inter-pane margin) */
+    /* editor / content pane — abut sidebar, fill to right edge */
     int cx = side_x + SIDEBAR_W;
     int cy = side_y;
-    int cw = sz.x - cx - PAD;
+    int cw = sz.x - cx;
     int ch = side_h;
-    draw_round_rect(dc, cx, cy, cw, ch, 4, pal.editor_bg, &pal.border);
+    draw_round_rect(dc, cx, cy, cw, ch, 0, pal.editor_bg);
 
-    auto cat = cats.empty() ? VcpCategory::AppOsd : (VcpCategory)cats[frame_->cat_index()];
+    auto cat = cats.empty() ? VcpCategory::SoftOsd : (VcpCategory)cats[frame_->cat_index()];
+    int list_bottom = cy + ch - INFO_H;
     int y = cy + INNER_PAD;
     auto& items = frame_->items();
 
     for (int i = 0; i < (int)items.size(); i++) {
         OsdItem& it = items[i];
-        VcpCategory icat = it.feat ? it.feat->cat : VcpCategory::AppOsd;
+        VcpCategory icat = it.feat ? it.feat->cat : VcpCategory::SoftOsd;
         if (icat != cat) {
             continue;
         }
-        if (y + ROW_H > cy + ch - INNER_PAD) {
+        if (y + ROW_H > list_bottom - INNER_PAD) {
             break;
         }
         it.row_y = y;
@@ -291,15 +300,44 @@ void OsdCanvas::on_paint(wxPaintEvent&) {
         y += ROW_H;
     }
 
-    /* statusBar */
-    draw_round_rect(dc, 2, sz.y - 22, sz.x - 4, 20, 0, pal.status_bg);
+    /* Information — description of the highlighted control */
+    int info_y = list_bottom;
+    draw_round_rect(dc, cx, info_y, cw, INFO_H, 0, pal.panel_bg);
+    dc.SetPen(wxPen(pal.border, 1));
+    dc.DrawLine(cx, info_y, cx + cw, info_y);
+    dc.SetTextForeground(pal.muted_fg);
+    dc.SetFont(osd_typeface(OsdTypeRole::MenuHeader));
+    dc.DrawText(tr("Information"), cx + INNER_PAD, info_y + 6);
+    wxString info;
+    int ai = frame_->active_item();
+    if (ai >= 0 && ai < (int)items.size()) {
+        const OsdItem& ait = items[ai];
+        VcpCategory acat = ait.feat ? ait.feat->cat : VcpCategory::SoftOsd;
+        if (acat == cat && !ait.description.empty()) {
+            info = tr(ait.description);
+        }
+    }
+    if (info.empty()) {
+        info = tr("Select a control to see its description.");
+    }
+    dc.SetTextForeground(pal.editor_fg);
+    dc.SetFont(osd_typeface(OsdTypeRole::Status));
+    wxRect info_rc(cx + INNER_PAD, info_y + 26, cw - 2 * INNER_PAD, INFO_H - 32);
+    dc.DrawLabel(info, info_rc, wxALIGN_LEFT | wxALIGN_TOP);
+
+    /* statusBar — full width, flush to bottom */
+    int status_y = sz.y - STATUS_H;
+    draw_round_rect(dc, 0, status_y, sz.x, STATUS_H, 0, pal.status_bg);
+    dc.SetPen(wxPen(pal.border, 1));
+    dc.DrawLine(0, status_y, sz.x, status_y);
     dc.SetTextForeground(pal.status_fg);
     dc.SetFont(osd_typeface(OsdTypeRole::Status));
-    dc.DrawText(frame_->status(), PAD, sz.y - 18);
+    dc.DrawText(frame_->status(), PAD, text_vcenter_y(dc, status_y, STATUS_H));
 }
 
 int OsdCanvas::hit_top_btn(int x, int y) const {
-    if (y >= 10 && y <= 38) {
+    int by = (TOP_H - 28) / 2;
+    if (y >= by && y <= by + 28) {
         if (refresh_w_ > 0 && x >= refresh_x_ && x <= refresh_x_ + refresh_w_) {
             return 0; /* refresh */
         }
@@ -311,9 +349,12 @@ int OsdCanvas::hit_top_btn(int x, int y) const {
 }
 
 int OsdCanvas::hit_sidebar(int x, int y) const {
-    int side_x = PAD;
-    int side_y = TOP_H + PAD;
+    int side_x = 0;
+    int side_y = TOP_H;
     if (x < side_x || x >= side_x + SIDEBAR_W) {
+        return -1;
+    }
+    if (y < side_y || y >= side_y + (GetClientSize().y - TOP_H - STATUS_H)) {
         return -1;
     }
     for (int v = 0; v < (int)frame_->visible_cats().size(); v++) {
@@ -328,12 +369,12 @@ int OsdCanvas::hit_sidebar(int x, int y) const {
 int OsdCanvas::hit_item(int x, int y, int* zone) const {
     *zone = 0;
     auto cat = frame_->visible_cats().empty()
-                   ? VcpCategory::AppOsd
+                   ? VcpCategory::SoftOsd
                    : (VcpCategory)frame_->visible_cats()[frame_->cat_index()];
     auto& items = frame_->items();
     for (int i = 0; i < (int)items.size(); i++) {
         const OsdItem& it = items[i];
-        VcpCategory icat = it.feat ? it.feat->cat : VcpCategory::AppOsd;
+        VcpCategory icat = it.feat ? it.feat->cat : VcpCategory::SoftOsd;
         if (icat != cat) {
             continue;
         }
@@ -629,7 +670,7 @@ void OsdCanvas::on_char_hook(wxKeyEvent& ev) {
     }
     if (key == WXK_TAB) {
         auto cat = frame_->visible_cats().empty()
-                       ? VcpCategory::AppOsd
+                       ? VcpCategory::SoftOsd
                        : (VcpCategory)frame_->visible_cats()[frame_->cat_index()];
         int dir = ev.ShiftDown() ? -1 : 1;
         int start = frame_->active_item();
@@ -637,7 +678,7 @@ void OsdCanvas::on_char_hook(wxKeyEvent& ev) {
         for (int step = 1; step <= n; step++) {
             int i = (start + dir * step + n * 8) % n;
             VcpCategory c =
-                frame_->items()[i].feat ? frame_->items()[i].feat->cat : VcpCategory::AppOsd;
+                frame_->items()[i].feat ? frame_->items()[i].feat->cat : VcpCategory::SoftOsd;
             if (c == cat && frame_->items()[i].kind != VcpKind::Ro) {
                 frame_->set_active_item(i);
                 Refresh(false);

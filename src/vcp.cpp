@@ -46,73 +46,110 @@ static const uint8_t refresh_geo[] = {0x86, 0x87, 0xda, 0xdc, 0};
 static const uint8_t refresh_color[] = {0x14, 0x0c, 0x0b, 0x16, 0x18, 0x1a, 0x6c, 0x6d, 0x6e, 0};
 
 static const VcpFeature catalog[] = {
-    {0x10, VcpCategory::Brightness, VcpKind::Continuous, N_("Brightness"), "b", "brightness", nullptr, 0, nullptr, false},
-    {0x12, VcpCategory::Brightness, VcpKind::Continuous, N_("Contrast"), "c", "contrast", nullptr, 0, nullptr, false},
-    {0x13, VcpCategory::Brightness, VcpKind::Continuous, N_("Backlight"), nullptr, "sun", nullptr, 0, nullptr, false},
-    {0x6b, VcpCategory::Brightness, VcpKind::Continuous, N_("Backlight white"), nullptr, "sun", nullptr, 0, nullptr, false},
-
-    {0x87, VcpCategory::Image, VcpKind::Continuous, N_("Sharpness"), "s", "adjustments", nullptr, 0, nullptr, false},
-    {0x86, VcpCategory::Image, VcpKind::Discrete, N_("Display scaling"), nullptr, "photo", nullptr, 0, nullptr, false},
-    {0xda, VcpCategory::Image, VcpKind::Discrete, N_("Scan mode"), nullptr, "photo", nullptr, 0, nullptr, false},
-    {0xdc, VcpCategory::Image, VcpKind::Discrete, N_("Display application"), nullptr, "apps", nullptr, 0, nullptr, false},
-    {0xb2, VcpCategory::Image, VcpKind::Ro, N_("Sub-pixel layout"), nullptr, "layout-sidebar", nullptr, 0, nullptr, false},
-    {0xb6, VcpCategory::Image, VcpKind::Ro, N_("Technology type"), nullptr, "device-desktop", nullptr, 0, nullptr, false},
+    {0x10, VcpCategory::Display, VcpKind::Continuous, N_("Brightness"), "b", "brightness", nullptr, 0,
+     nullptr, false, N_("Overall image luminance. Higher values look brighter.")},
+    {0x12, VcpCategory::Display, VcpKind::Continuous, N_("Contrast"), "c", "contrast", nullptr, 0,
+     nullptr, false, N_("Difference between dark and bright areas of the image.")},
+    {0x13, VcpCategory::Display, VcpKind::Continuous, N_("Backlight"), nullptr, "sun", nullptr, 0,
+     nullptr, false, N_("Panel backlight level when exposed separately from brightness.")},
+    {0x6b, VcpCategory::Display, VcpKind::Continuous, N_("Backlight white"), nullptr, "sun", nullptr, 0,
+     nullptr, false, N_("White-channel backlight level on some LED panels.")},
 
     {0x14, VcpCategory::Color, VcpKind::Discrete, N_("Color preset"), "t", "palette", color_presets,
-     sizeof(color_presets) / sizeof(color_presets[0]), nullptr, false},
+     sizeof(color_presets) / sizeof(color_presets[0]), nullptr, false,
+     N_("Named white-point / picture mode from the monitor (sRGB, Native, …).")},
     {0x0c, VcpCategory::Color, VcpKind::Discrete, N_("Color temp mode"), nullptr, "temperature",
-     color_temp_modes, sizeof(color_temp_modes) / sizeof(color_temp_modes[0]), nullptr, false},
-    {0x0b, VcpCategory::Color, VcpKind::Ro, N_("Color temp. step"), nullptr, "temperature", nullptr, 0, nullptr, false},
-    {0x16, VcpCategory::Color, VcpKind::Continuous, N_("Gain red"), nullptr, "palette", nullptr, 0, nullptr, false},
-    {0x18, VcpCategory::Color, VcpKind::Continuous, N_("Gain green"), nullptr, "palette", nullptr, 0, nullptr, false},
-    {0x1a, VcpCategory::Color, VcpKind::Continuous, N_("Gain blue"), nullptr, "palette", nullptr, 0, nullptr, false},
-    {0x6c, VcpCategory::Color, VcpKind::Continuous, N_("Black level red"), nullptr, "palette", nullptr, 0, nullptr, false},
-    {0x6d, VcpCategory::Color, VcpKind::Continuous, N_("Black level green"), nullptr, "palette", nullptr, 0, nullptr, false},
-    {0x6e, VcpCategory::Color, VcpKind::Continuous, N_("Black level blue"), nullptr, "palette", nullptr, 0, nullptr, false},
+     color_temp_modes, sizeof(color_temp_modes) / sizeof(color_temp_modes[0]), nullptr, false,
+     N_("Discrete color-temperature request (standard Kelvin white points).")},
+    {0x0b, VcpCategory::Color, VcpKind::Ro, N_("Color temp. step"), nullptr, "temperature", nullptr, 0,
+     nullptr, false, N_("Reported Kelvin step size used with color-temperature request.")},
+    {0x16, VcpCategory::Color, VcpKind::Continuous, N_("Gain red"), nullptr, "palette", nullptr, 0,
+     nullptr, false, N_("Red channel gain (drive) for the user color mode.")},
+    {0x18, VcpCategory::Color, VcpKind::Continuous, N_("Gain green"), nullptr, "palette", nullptr, 0,
+     nullptr, false, N_("Green channel gain (drive) for the user color mode.")},
+    {0x1a, VcpCategory::Color, VcpKind::Continuous, N_("Gain blue"), nullptr, "palette", nullptr, 0,
+     nullptr, false, N_("Blue channel gain (drive) for the user color mode.")},
+    {0x6c, VcpCategory::Color, VcpKind::Continuous, N_("Black level red"), nullptr, "palette", nullptr, 0,
+     nullptr, false, N_("Red channel black level (offset / cut-off).")},
+    {0x6d, VcpCategory::Color, VcpKind::Continuous, N_("Black level green"), nullptr, "palette", nullptr,
+     0, nullptr, false, N_("Green channel black level (offset / cut-off).")},
+    {0x6e, VcpCategory::Color, VcpKind::Continuous, N_("Black level blue"), nullptr, "palette", nullptr, 0,
+     nullptr, false, N_("Blue channel black level (offset / cut-off).")},
 
-    {0x62, VcpCategory::Audio, VcpKind::Continuous, N_("Speaker volume"), "v", "volume", nullptr, 0, nullptr, false},
+    {0x87, VcpCategory::Image, VcpKind::Continuous, N_("Sharpness"), "s", "adjustments", nullptr, 0,
+     nullptr, false, N_("Edge enhancement / sharpness of the image.")},
+    {0x86, VcpCategory::Image, VcpKind::Discrete, N_("Display scaling"), nullptr, "photo", nullptr, 0,
+     nullptr, false, N_("How the source is scaled to the panel (aspect, full, …).")},
+    {0xda, VcpCategory::Image, VcpKind::Discrete, N_("Scan mode"), nullptr, "photo", nullptr, 0, nullptr,
+     false, N_("Overscan / underscan presentation of the video signal.")},
+    {0xdc, VcpCategory::Image, VcpKind::Discrete, N_("Display application"), nullptr, "apps", nullptr, 0,
+     nullptr, false, N_("Monitor picture application mode when exposed via VCP.")},
+    {0xb2, VcpCategory::Image, VcpKind::Ro, N_("Sub-pixel layout"), nullptr, "layout-sidebar", nullptr, 0,
+     nullptr, false, N_("Reported RGB sub-pixel arrangement of the panel.")},
+    {0xb6, VcpCategory::Image, VcpKind::Ro, N_("Technology type"), nullptr, "device-desktop", nullptr, 0,
+     nullptr, false, N_("Reported display technology (LCD, OLED, …).")},
+
+    {0x04, VcpCategory::Presets, VcpKind::Button, N_("Factory defaults"), "0", "restore", nullptr, 0,
+     nullptr, true, N_("Restore all monitor settings to factory defaults.")},
+    {0x05, VcpCategory::Presets, VcpKind::Button, N_("Factory brightness/contrast"), nullptr, "brightness",
+     nullptr, 0, refresh_bri, false, N_("Restore factory brightness and contrast values.")},
+    {0x06, VcpCategory::Presets, VcpKind::Button, N_("Factory geometry"), nullptr, "photo", nullptr, 0,
+     refresh_geo, false, N_("Restore factory geometry / scaling related settings.")},
+    {0x08, VcpCategory::Presets, VcpKind::Button, N_("Factory color"), nullptr, "palette", nullptr, 0,
+     refresh_color, false, N_("Restore factory color gains and related settings.")},
+
+    {0x60, VcpCategory::Input, VcpKind::Discrete, N_("Input source"), "i", "device-desktop", input_sources,
+     sizeof(input_sources) / sizeof(input_sources[0]), nullptr, false,
+     N_("Active video input (HDMI, DisplayPort, DVI, VGA, …).")},
+    {0xac, VcpCategory::Input, VcpKind::Ro, N_("Horizontal frequency"), nullptr, "gauge", nullptr, 0,
+     nullptr, false, N_("Reported horizontal sync frequency of the current input.")},
+    {0xae, VcpCategory::Input, VcpKind::Ro, N_("Vertical frequency"), nullptr, "gauge", nullptr, 0, nullptr,
+     false, N_("Reported vertical refresh rate of the current input.")},
+
+    {0x62, VcpCategory::Audio, VcpKind::Continuous, N_("Speaker volume"), "v", "volume", nullptr, 0,
+     nullptr, false, N_("Built-in speaker volume when the monitor exposes audio VCP.")},
     {0x8d, VcpCategory::Audio, VcpKind::Discrete, N_("Audio mute"), "m", "volume", mute_vals,
-     sizeof(mute_vals) / sizeof(mute_vals[0]), nullptr, false},
-    {0x91, VcpCategory::Audio, VcpKind::Continuous, N_("Treble"), nullptr, "volume", nullptr, 0, nullptr, false},
-    {0x92, VcpCategory::Audio, VcpKind::Continuous, N_("Bass"), nullptr, "volume", nullptr, 0, nullptr, false},
-    {0x93, VcpCategory::Audio, VcpKind::Continuous, N_("Balance"), "a", "adjustments", nullptr, 0, nullptr, false},
+     sizeof(mute_vals) / sizeof(mute_vals[0]), nullptr, false, N_("Mute or unmute monitor speakers.")},
+    {0x91, VcpCategory::Audio, VcpKind::Continuous, N_("Treble"), nullptr, "volume", nullptr, 0, nullptr,
+     false, N_("High-frequency audio tone control.")},
+    {0x92, VcpCategory::Audio, VcpKind::Continuous, N_("Bass"), nullptr, "volume", nullptr, 0, nullptr,
+     false, N_("Low-frequency audio tone control.")},
+    {0x93, VcpCategory::Audio, VcpKind::Continuous, N_("Balance"), "a", "adjustments", nullptr, 0, nullptr,
+     false, N_("Left/right speaker balance.")},
 
-    {0xca, VcpCategory::DeviceOsd, VcpKind::Discrete, N_("OSD control"), nullptr, "device-desktop", nullptr, 0, nullptr, false},
+    {0xca, VcpCategory::DeviceOsd, VcpKind::Discrete, N_("OSD control"), nullptr, "device-desktop", nullptr,
+     0, nullptr, false, N_("Enable or lock the monitor's own on-screen menu.")},
     {0xcc, VcpCategory::DeviceOsd, VcpKind::Discrete, N_("OSD language"), "l", "language", osd_lang,
-     sizeof(osd_lang) / sizeof(osd_lang[0]), nullptr, false},
+     sizeof(osd_lang) / sizeof(osd_lang[0]), nullptr, false,
+     N_("Language of the monitor's built-in OSD.")},
 
-    {0x04, VcpCategory::Presets, VcpKind::Button, N_("Factory defaults"), "0", "restore", nullptr, 0, nullptr, true},
-    {0x05, VcpCategory::Presets, VcpKind::Button, N_("Factory brightness/contrast"), nullptr, "brightness", nullptr, 0, refresh_bri, false},
-    {0x06, VcpCategory::Presets, VcpKind::Button, N_("Factory geometry"), nullptr, "photo", nullptr, 0, refresh_geo, false},
-    {0x08, VcpCategory::Presets, VcpKind::Button, N_("Factory color"), nullptr, "palette", nullptr, 0, refresh_color, false},
-
-    {0x60, VcpCategory::Misc, VcpKind::Discrete, N_("Input source"), "i", "device-desktop", input_sources,
-     sizeof(input_sources) / sizeof(input_sources[0]), nullptr, false},
-    {0xd6, VcpCategory::Misc, VcpKind::Discrete, N_("Power mode"), "p", "gauge", power_modes,
-     sizeof(power_modes) / sizeof(power_modes[0]), nullptr, false},
-    {0xac, VcpCategory::Misc, VcpKind::Ro, N_("Horizontal frequency"), nullptr, "gauge", nullptr, 0, nullptr, false},
-    {0xae, VcpCategory::Misc, VcpKind::Ro, N_("Vertical frequency"), nullptr, "gauge", nullptr, 0, nullptr, false},
-    {0xdf, VcpCategory::Misc, VcpKind::Ro, N_("VCP version"), nullptr, "settings", nullptr, 0, nullptr, false},
+    {0xd6, VcpCategory::System, VcpKind::Discrete, N_("Power mode"), "p", "gauge", power_modes,
+     sizeof(power_modes) / sizeof(power_modes[0]), nullptr, false,
+     N_("Monitor power state (on / off / power-off).")},
+    {0xdf, VcpCategory::System, VcpKind::Ro, N_("VCP version"), nullptr, "settings", nullptr, 0, nullptr,
+     false, N_("MCCS / VCP version reported by the display.")},
 };
 
 const char* vcp_category_name(VcpCategory cat) {
     switch (cat) {
-    case VcpCategory::Brightness:
-        return N_("Brightness");
-    case VcpCategory::Image:
-        return N_("Image");
+    case VcpCategory::Display:
+        return N_("Display");
     case VcpCategory::Color:
         return N_("Color");
+    case VcpCategory::Image:
+        return N_("Image");
+    case VcpCategory::Presets:
+        return N_("Presets");
+    case VcpCategory::Input:
+        return N_("Input");
     case VcpCategory::Audio:
         return N_("Audio");
     case VcpCategory::DeviceOsd:
         return N_("OSD");
-    case VcpCategory::Presets:
-        return N_("Presets");
-    case VcpCategory::Misc:
-        return N_("Misc");
-    case VcpCategory::AppOsd:
-        return N_("App OSD");
+    case VcpCategory::SoftOsd:
+        return N_("Soft OSD");
+    case VcpCategory::System:
+        return N_("System");
     default:
         return N_("Unknown");
     }
@@ -120,22 +157,24 @@ const char* vcp_category_name(VcpCategory cat) {
 
 const char* vcp_category_icon(VcpCategory cat) {
     switch (cat) {
-    case VcpCategory::Brightness:
+    case VcpCategory::Display:
         return "brightness";
-    case VcpCategory::Image:
-        return "photo";
     case VcpCategory::Color:
         return "palette";
+    case VcpCategory::Image:
+        return "photo";
+    case VcpCategory::Presets:
+        return "restore";
+    case VcpCategory::Input:
+        return "device-desktop";
     case VcpCategory::Audio:
         return "volume";
     case VcpCategory::DeviceOsd:
-        return "device-desktop";
-    case VcpCategory::Presets:
-        return "restore";
-    case VcpCategory::Misc:
-        return "settings";
-    case VcpCategory::AppOsd:
+        return "language";
+    case VcpCategory::SoftOsd:
         return "apps";
+    case VcpCategory::System:
+        return "settings";
     default:
         return "settings";
     }
@@ -243,7 +282,7 @@ int vcp_caps_supports(const VcpCaps& caps, uint8_t code) {
 }
 
 bool vcp_caps_category_supported(const VcpCaps& caps, VcpCategory cat) {
-    if (cat == VcpCategory::AppOsd) {
+    if (cat == VcpCategory::SoftOsd) {
         return true;
     }
     for (const auto& f : vcp_features()) {

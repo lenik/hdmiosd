@@ -34,9 +34,9 @@ int main() {
     expect_true("caps brightness", vcp_caps_supports(caps, 0x10) > 0);
     expect_true("caps contrast", vcp_caps_supports(caps, 0x12) > 0);
     expect_true("caps no audio mute", vcp_caps_supports(caps, 0x8d) == 0);
-    expect_true("cat brightness", vcp_caps_category_supported(caps, VcpCategory::Brightness));
+    expect_true("cat display", vcp_caps_category_supported(caps, VcpCategory::Display));
     expect_true("no audio", !vcp_caps_category_supported(caps, VcpCategory::Audio));
-    expect_true("app osd always", vcp_caps_category_supported(caps, VcpCategory::AppOsd));
+    expect_true("soft osd always", vcp_caps_category_supported(caps, VcpCategory::SoftOsd));
     expect_eq_int("color temp 6500K", (int)vcp_color_temp_kelvin(35, 100), 6500);
     expect_true("feature brightness", vcp_feature_by_code(0x10) != nullptr);
     expect_eq_int("0x0B RO", (int)vcp_feature_by_code(0x0b)->kind, (int)VcpKind::Ro);
@@ -46,6 +46,9 @@ int main() {
     expect_true("0x0C 35 is 6500 K",
                 strcmp(vcp_color_temp_mode_label(35, 100, lab, sizeof(lab)), "6500 K") == 0);
     expect_true("device osd name", strcmp(vcp_category_name(VcpCategory::DeviceOsd), "OSD") == 0);
-    expect_true("app osd name", strcmp(vcp_category_name(VcpCategory::AppOsd), "App OSD") == 0);
+    expect_true("soft osd name", strcmp(vcp_category_name(VcpCategory::SoftOsd), "Soft OSD") == 0);
+    expect_true("display name", strcmp(vcp_category_name(VcpCategory::Display), "Display") == 0);
+    expect_true("input name", strcmp(vcp_category_name(VcpCategory::Input), "Input") == 0);
+    expect_true("system name", strcmp(vcp_category_name(VcpCategory::System), "System") == 0);
     return failures == 0 ? 0 : 1;
 }

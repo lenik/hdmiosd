@@ -6,15 +6,17 @@
 #include <string>
 #include <vector>
 
+/* Sidebar order matches this enum order. */
 enum class VcpCategory {
-    Brightness = 0,
-    Image,
+    Display = 0, /* luminance / contrast / backlight */
     Color,
+    Image,
+    Presets,
+    Input,     /* input source + timing */
     Audio,
     DeviceOsd, /* monitor OSD language / button control */
-    Presets,
-    Misc,
-    AppOsd, /* hdmiosd window - not a VCP category */
+    SoftOsd,   /* hdmiosd window — not a VCP category */
+    System,    /* power, VCP version, … */
     Count
 };
 
@@ -36,6 +38,7 @@ struct VcpFeature {
     size_t nchoices;
     const uint8_t* refresh_codes;
     bool refresh_all;
+    const char* description; /* N_() msgid; shown in Soft/Device info pane */
 };
 
 struct VcpCaps {

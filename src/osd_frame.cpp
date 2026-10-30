@@ -138,7 +138,7 @@ void OsdFrame::set_cat_index(int i) {
     active_item_ = -1;
     auto cat = (VcpCategory)visible_cats_[cat_index_];
     for (int j = 0; j < (int)items_.size(); j++) {
-        VcpCategory c = items_[j].feat ? items_[j].feat->cat : VcpCategory::AppOsd;
+        VcpCategory c = items_[j].feat ? items_[j].feat->cat : VcpCategory::SoftOsd;
         if (c == cat && items_[j].kind != VcpKind::Ro) {
             active_item_ = j;
             break;
@@ -164,7 +164,8 @@ void OsdFrame::save_settings() {
 }
 
 void OsdFrame::build_app_osd_items() {
-    auto add = [&](int id, const char* name, const char* icon, uint16_t cur, uint16_t max) {
+    auto add = [&](int id, const char* name, const char* icon, const char* desc, uint16_t cur,
+                   uint16_t max) {
         OsdItem it;
         it.app_id = id;
         it.kind = VcpKind::Continuous;
@@ -174,17 +175,27 @@ void OsdFrame::build_app_osd_items() {
         it.code = (uint8_t)id;
         it.choice_labels.push_back(name); /* English msgid */
         it.choice_labels.push_back(icon ? icon : "apps");
+        if (desc) {
+            it.description = desc;
+        }
         items_.push_back(std::move(it));
     };
     auto& a = settings_->app;
-    add(APP_OPACITY, N_("Opacity %"), "apps", (uint16_t)(a.opacity * 100 + 0.5), 100);
-    add(APP_WIDTH, N_("Width"), "layout-sidebar", (uint16_t)std::clamp(a.width, 200, 4000), 2000);
-    add(APP_HEIGHT, N_("Height"), "layout-sidebar", (uint16_t)std::clamp(a.height, 160, 3000),
-        1600);
-    add(APP_LEFT, N_("Margin left"), "arrow-back", (uint16_t)a.margin_left, 400);
-    add(APP_RIGHT, N_("Margin right"), "arrow-forward", (uint16_t)a.margin_right, 400);
-    add(APP_TOP, N_("Margin top"), "arrow-back-up", (uint16_t)a.margin_top, 400);
-    add(APP_BOTTOM, N_("Margin bottom"), "arrow-back", (uint16_t)a.margin_bottom, 400);
+    add(APP_OPACITY, N_("Opacity %"), "apps",
+        N_("Transparency of this Soft OSD window over the desktop."),
+        (uint16_t)(a.opacity * 100 + 0.5), 100);
+    add(APP_WIDTH, N_("Width"), "layout-sidebar", N_("Soft OSD window width in pixels."),
+        (uint16_t)std::clamp(a.width, 200, 4000), 2000);
+    add(APP_HEIGHT, N_("Height"), "layout-sidebar", N_("Soft OSD window height in pixels."),
+        (uint16_t)std::clamp(a.height, 160, 3000), 1600);
+    add(APP_LEFT, N_("Margin left"), "arrow-back",
+        N_("Distance from the left edge of the current monitor."), (uint16_t)a.margin_left, 400);
+    add(APP_RIGHT, N_("Margin right"), "arrow-forward",
+        N_("Distance from the right edge of the current monitor."), (uint16_t)a.margin_right, 400);
+    add(APP_TOP, N_("Margin top"), "arrow-back-up",
+        N_("Distance from the top edge of the current monitor."), (uint16_t)a.margin_top, 400);
+    add(APP_BOTTOM, N_("Margin bottom"), "arrow-back",
+        N_("Distance from the bottom edge of the current monitor."), (uint16_t)a.margin_bottom, 400);
 }
 
 void OsdFrame::show_shell_ui(const std::string& status_msg) {
@@ -192,7 +203,7 @@ void OsdFrame::show_shell_ui(const std::string& status_msg) {
     visible_cats_.clear();
     active_item_ = -1;
     color_temp_step_ = 100;
-    visible_cats_.push_back((int)VcpCategory::AppOsd);
+    visible_cats_.push_back((int)VcpCategory::SoftOsd);
     cat_index_ = 0;
     build_app_osd_items();
     set_status(status_msg);
@@ -205,25 +216,19 @@ void OsdFrame::rebuild_visible_cats() {
     bool cat_has[(int)VcpCategory::Count] = {};
     for (const auto& it : items_) {
         if (it.app_id >= 0) {
-            cat_has[(int)VcpCategory::AppOsd] = true;
+            cat_has[(int)VcpCategory::SoftOsd] = true;
         } else if (it.feat) {
             cat_has[(int)it.feat->cat] = true;
         }
     }
+    cat_has[(int)VcpCategory::SoftOsd] = true; /* always listed */
     int prev = cat_index_ < (int)visible_cats_.size() ? visible_cats_[cat_index_] : -1;
     visible_cats_.clear();
-    bool app_inserted = false;
-    for (int c = 0; c < (int)VcpCategory::AppOsd; c++) {
+    /* Enum order == sidebar order (Display … System). */
+    for (int c = 0; c < (int)VcpCategory::Count; c++) {
         if (cat_has[c]) {
             visible_cats_.push_back(c);
         }
-        if (c == (int)VcpCategory::DeviceOsd) {
-            visible_cats_.push_back((int)VcpCategory::AppOsd);
-            app_inserted = true;
-        }
-    }
-    if (!app_inserted) {
-        visible_cats_.push_back((int)VcpCategory::AppOsd);
     }
     cat_index_ = 0;
     for (int i = 0; i < (int)visible_cats_.size(); i++) {
@@ -257,6 +262,9 @@ bool OsdFrame::make_item_from_feat(HdmiDisplay& d, const VcpFeature& feat, OsdIt
     it.feat = &feat;
     it.code = feat.code;
     it.kind = feat.kind;
+    if (feat.description) {
+        it.description = feat.description;
+    }
     if (feat.kind == VcpKind::Button) {
         return true;
     }

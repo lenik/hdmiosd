@@ -193,7 +193,7 @@ void OsdFrame::sync_margins_from_position(wxPoint frame_pos, bool save) {
     }
     if (highlight >= 0) {
         for (int i = 0; i < (int)visible_cats_.size(); i++) {
-            if (visible_cats_[(size_t)i] == (int)VcpCategory::AppOsd) {
+            if (visible_cats_[(size_t)i] == (int)VcpCategory::SoftOsd) {
                 cat_index_ = i;
                 break;
             }

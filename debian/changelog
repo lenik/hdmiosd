@@ -1,3 +1,14 @@
+hdmiosd (0.2.4) unstable; urgency=medium
+
+  * Flush OSD chrome edge-to-edge (no outer panel gaps).
+  * Rename categories to Display, Soft OSD, System; add Input; reorder
+    the sidebar (Display→…→System).
+  * Show Information descriptions for the highlighted control at the
+    bottom of the content pane.
+  * Refresh README / README-zh_CN (Soft OSD naming, screenshots).
+
+ -- Lenik (谢继雷) <lenik@bodz.net>  Fri, 30 Oct 2026 17:59:13 +0800
+
 hdmiosd (0.2.3) unstable; urgency=medium
 
   * Fix window jump while dragging OSD; address zfr lint warnings.

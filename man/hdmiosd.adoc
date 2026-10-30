@@ -22,12 +22,12 @@ wxWidgets canvas OSD.
 
 Two OSD areas are provided:
 
-*Device menus* (Brightness, Image, Color, Audio, *OSD*, Presets, Misc)::
+*Device menus* (Display, Color, Image, Presets, Input, Audio, *OSD*, System)::
   Control the monitor via VCP. Empty categories (for example Audio with no
   supported codes) stay hidden. The *OSD* tab adjusts the monitor's own OSD
   language / button control when supported.
 
-*App OSD*::
+*Soft OSD*::
   Control the hdmiosd window: opacity, size, and edge margins.
   Values are written to *~/.config/hdmiosd/settings.ini* together with the
   last selected display and custom keyboard shortcuts.

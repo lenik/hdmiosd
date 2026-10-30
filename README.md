@@ -6,14 +6,29 @@ On-screen DDC/CI controller for HDMI/DisplayPort monitors on Linux
 `hdmiosd` talks DDC/CI directly over `/dev/i2c-*` (no `ddcutil` process) and
 draws a flat canvas OSD with Tabler icons embedded via bas-cpp assets.
 
-## Device OSD vs App OSD
+## Screenshots
+
+Device Color controls with live **Information** for the highlighted row:
+
+![Color tab](screenshots/screenshot1.png)
+
+**Soft OSD** — opacity, size, and monitor-edge margins:
+
+![Soft OSD](screenshots/screenshot2.png)
+
+Localized CLI help (`langtour hdmiosd -h`):
+
+![CLI help](screenshots/cmdline.png)
+
+## Device menus vs Soft OSD
 
 | Menu | Purpose |
 |------|---------|
-| **OSD** (and Brightness / Image / Color / …) | Control the **monitor** via VCP |
-| **App OSD** | Control the **hdmiosd window**: opacity, size, placement |
+| **Display**, **Color**, **Image**, **Presets**, **Input**, **Audio**, **OSD**, **System** | Control the **monitor** via VCP (empty tabs stay hidden) |
+| **Soft OSD** | Control the **hdmiosd window**: opacity, size, placement |
 
-App OSD values (and last display / shortcuts) are stored in:
+Sidebar order matches the table. Soft OSD values (and last display / shortcuts)
+are stored in:
 
 ```text
 ~/.config/hdmiosd/settings.ini
@@ -39,8 +54,19 @@ I2C access typically requires the `i2c` group (or root).
 
 ## Shortcuts
 
-`1`–`N` tabs, `Tab` cycle, `←`/`→` adjust, `b`/`c`/… features, `Ctrl+Z` undo,
-`F5`/`F6` refresh, `[`/`]` displays, `Esc` quit.  
+| Keys | Action |
+|------|--------|
+| `1`–`N` | Select sidebar tab |
+| `Tab` / `Shift+Tab` | Next / previous control in the tab |
+| `←` `→` / `-` `+` | Adjust value |
+| `b` `c` … | Feature shortcuts (see row labels) |
+| `Ctrl+Z` / `Ctrl+R` | Undo / reset active control |
+| `F5` | Refresh displays and controls |
+| `F11` / `F12` | Previous / next theme |
+| `[` / `]` | Previous / next display |
+| Drag blank area | Move Soft OSD (nearest-edge margins update live) |
+| `Esc` / `q` | Quit |
+
 Defaults live under `[shortcuts]` in `settings.ini` and can be customized there.
 
 ## Build
@@ -48,9 +74,9 @@ Defaults live under `[shortcuts]` in `settings.ini` and can be customized there.
 ```bash
 sudo apt install meson ninja-build g++ pkg-config libbas-cpp-dev libbas-ui-dev \
   libwxgtk3.2-dev asciidoctor zip binutils
-meson setup /build
-ninja -C /build
-meson test -C /build
+meson setup build
+ninja -C build
+meson test -C build
 ```
 
 Icons: copy selected Tabler PNGs into `assets/icons/{16,24}/`; Meson zips them
