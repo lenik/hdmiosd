@@ -9,45 +9,61 @@ v{project-version}, {project-year}
 
 == Name
 
-hdmiosd - concatenate files to standard output
+hdmiosd - on-screen DDC/CI controller for HDMI/DP displays
 
 == Synopsis
 
-*hdmiosd* [_OPTION_]... [_FILE_]...
+*hdmiosd* [_OPTION_]...
 
 == Description
 
-Copy each _FILE_ to standard output in order.
-If _FILE_ is a single dash (*-*), read standard input at that position.
-If no _FILE_ is given, read standard input once.
+*hdmiosd* finds monitors that speak DDC/CI on Linux I2C buses and opens a
+wxWidgets canvas OSD.
 
-*hdmiosd* is similar in spirit to *cat*(1): it writes the concatenation of
-inputs to standard output.
+Two OSD areas are provided:
+
+*Device menus* (Brightness, Image, Color, Audio, *OSD*, Presets, Misc)::
+  Control the monitor via VCP. Empty categories (for example Audio with no
+  supported codes) stay hidden. The *OSD* tab adjusts the monitor's own OSD
+  language / button control when supported.
+
+*App OSD*::
+  Control the hdmiosd window: opacity, size, and edge margins.
+  Values are written to *~/.config/hdmiosd/settings.ini* together with the
+  last selected display and custom keyboard shortcuts.
+
+Communication is implemented directly over */dev/i2c-** (no *ddcutil*
+subprocess). Tabler icons are embedded in the binary via bas-cpp zip assets.
+
+Access to I2C devices usually requires membership in the *i2c* group (or
+root).
 
 == Options
 
-*-v, --verbose*::
-  Print each file name (or ``standard input`` for *-*) to standard error
-  before copying that input.
-  Repeat for more verbose logging.
+*-d, --device* _DEV_::
+  Restrict discovery to buses related to _DEV_.
 
-*-q, --quiet*::
-  Suppress messages that would be printed by *--verbose*.
-  If both *--verbose* and *--quiet* are given, *--quiet* wins.
+*-o, --opacity* _NUM_::
+  Window opacity from *0* to *100* (overrides settings for this run).
 
-*-h, --help*::
-  Print a usage summary and exit successfully.
+*-g, --geom* _W_[x_H_]::
+  Window size.
 
-*--version*::
-  Print version and license information and exit successfully.
+*-l, --left* / *-r, --right* / *-t, --top* / *-b, --bottom* _NUM_::
+  Place the window _NUM_ pixels from that screen edge.
 
-== Exit status
+*-L, --list*::
+  List DDC-capable displays and exit.
 
-*0*::
-  Success.
+*-v, --verbose* / *-q, --quiet* / *-h, --help* / *--version*::
+  Logging, help, version.
 
-*1*::
-  An error occurred (invalid options, unreadable file, or I/O error).
+== Files
+
+*~/.config/hdmiosd/settings.ini*::
+  *[display]* last selected bus/connector;
+  *[app_osd]* opacity, geometry, margins;
+  *[shortcuts]* action to key mappings.
 
 == Author
 
@@ -57,10 +73,6 @@ Written by {project-author} <{project-email}>.
 
 Copyright (C) {project-year}.
 License AGPL-3.0-or-later.
-This is free software: you are free to change and redistribute it under the
-terms of the GNU Affero General Public License.
-There is NO WARRANTY, to the extent permitted by law.
 See the LICENSE file in the source distribution for the full license text,
 including supplemental terms stating this project opposes AI exploitation and
-AI hegemony, and rejects mindless MIT-style licensing and politically naive
-BSD-style licensing.
+AI hegemony.

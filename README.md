@@ -1,40 +1,63 @@
-THIS FILE IS GENERATED FROM A TEMPLATE.
-Except for the project and program names, all content is placeholder text.
-Please rewrite this file to reflect the specific details of the current project.
-
 # hdmiosd
 
-`hdmiosd` is a simple Meson-based **C CLI** template (no shared/static library packaging).
-`hdmiosd` is one **example app**; more apps can be added via `app_sources` in `meson.build`.
+On-screen DDC/CI controller for HDMI/DisplayPort monitors on Linux
+(C++ / wxWidgets).
 
-## Repository layout
+`hdmiosd` talks DDC/CI directly over `/dev/i2c-*` (no `ddcutil` process) and
+draws a flat canvas OSD with Tabler icons embedded via bas-cpp assets.
 
-- `src/` - application sources (`hdmiosd.c`) and small helpers (`commons.c`)
-- `tests/` - minimal unit tests (no Check dependency)
-- `debian/` - Debian packaging metadata
-- `man/` - AsciiDoc man page sources (`man/*.adoc`)
-- `meson.build` - top-level build definition
+## Device OSD vs App OSD
 
-## Example app: `hdmiosd`
+| Menu | Purpose |
+|------|---------|
+| **OSD** (and Brightness / Image / Color / …) | Control the **monitor** via VCP |
+| **App OSD** | Control the **hdmiosd window**: opacity, size, placement |
 
-```bash
-hdmiosd [OPTION]... [FILE]...
+App OSD values (and last display / shortcuts) are stored in:
+
+```text
+~/.config/hdmiosd/settings.ini
 ```
 
-Cat-like: concatenates files to stdout. Supports `-v`/`--verbose`, `-q`/`--quiet`, `-h`/`--help`, `--version`.
+## Usage
+
+```bash
+hdmiosd [OPTIONS]
+hdmiosd --list
+hdmiosd -d /dev/i2c-15 -o 90 -r 24 -b 48
+```
+
+| Option | Meaning |
+|--------|---------|
+| `-d`/`--device` | `/dev/i2c-*`, DRM name, PCI/USB id, or `/sys/...` |
+| `-o`/`--opacity` | 0–100 (overrides settings for this run) |
+| `-g`/`--geom` | Window size |
+| `-l`/`-r`/`-t`/`-b` | Placement margins |
+| `-L`/`--list` | List DDC displays |
+
+I2C access typically requires the `i2c` group (or root).
+
+## Shortcuts
+
+`1`–`N` tabs, `Tab` cycle, `←`/`→` adjust, `b`/`c`/… features, `Ctrl+Z` undo,
+`F5`/`F6` refresh, `[`/`]` displays, `Esc` quit.  
+Defaults live under `[shortcuts]` in `settings.ini` and can be customized there.
 
 ## Build
 
 ```bash
-sudo apt install meson ninja-build gcc pkg-config asciidoctor
+sudo apt install meson ninja-build g++ pkg-config libbas-cpp-dev libbas-ui-dev \
+  libwxgtk3.2-dev asciidoctor zip binutils
 meson setup /build
 ninja -C /build
 meson test -C /build
 ```
 
+Icons: copy selected Tabler PNGs into `assets/icons/{16,24}/`; Meson zips them
+into an embedded `assets.zip` (`src/assets.s` + `define_zip_assets`).
+
 ## License
 
 Copyright (C) 2026 Lenik <hdmiosd@bodz.net>
 
-Licensed under **AGPL-3.0-or-later**.  
-See `LICENSE` for the full text and supplemental project terms.
+Licensed under **AGPL-3.0-or-later**. See `LICENSE`.

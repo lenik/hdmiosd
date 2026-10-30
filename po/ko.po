@@ -1,0 +1,518 @@
+# Translations for hdmiosd.
+# Copyright (C) 2026 Lenik
+# This file is distributed under the same license as the hdmiosd package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: hdmiosd 0.2.0\n"
+"Report-Msgid-Bugs-To: hdmiosd@bodz.net\n"
+"PO-Revision-Date: 2026-10-30 15:30+0800\n"
+"Last-Translator: Lenik <hdmiosd@bodz.net>\n"
+"Language-Team: Korean\n"
+"Language: ko\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/hdmiosd.cpp:31
+msgid ""
+"Usage: hdmiosd [OPTION]...\n"
+"Control HDMI/DP monitor settings via DDC/CI (Device OSD) and App OSD.\n"
+"\n"
+msgstr ""
+"사용법: hdmiosd [옵션]...\n"
+"DDC/CI로 HDMI/DP 모니터를 제어합니다(장치 OSD 및 앱 OSD).\n"
+"\n"
+
+#: src/hdmiosd.cpp:35
+msgid "/dev/i2c-*, /dev/video*, PCI/USB id, or /sys/... path\n"
+msgstr ""
+"/dev/i2c-*, /dev/video*, PCI/USB id 또는 /sys/... 경로\n"
+
+#: src/hdmiosd.cpp:37
+msgid "window opacity 0-100 (overrides settings.ini)\n"
+msgstr ""
+"창 불투명도 0–100(settings.ini 덮어씀)\n"
+
+#: src/hdmiosd.cpp:39
+msgid "window size\n"
+msgstr ""
+"창 크기\n"
+
+#: src/hdmiosd.cpp:41
+msgid "place from left edge\n"
+msgstr ""
+"왼쪽 가장자리로부터 배치\n"
+
+#: src/hdmiosd.cpp:43
+msgid "place from right edge\n"
+msgstr ""
+"오른쪽 가장자리로부터 배치\n"
+
+#: src/hdmiosd.cpp:45
+msgid "place from top edge\n"
+msgstr ""
+"위쪽 가장자리로부터 배치\n"
+
+#: src/hdmiosd.cpp:47
+msgid "place from bottom edge\n"
+msgstr ""
+"아래쪽 가장자리로부터 배치\n"
+
+#: src/hdmiosd.cpp:49
+msgid "list DDC-capable displays and exit\n"
+msgstr ""
+"DDC 지원 디스플레이 목록 출력 후 종료\n"
+
+#: src/hdmiosd.cpp:51
+msgid "more logging\n"
+msgstr ""
+"자세한 로그\n"
+
+#: src/hdmiosd.cpp:53
+msgid "less logging\n"
+msgstr ""
+"간단한 로그\n"
+
+#: src/hdmiosd.cpp:55
+msgid "help\n"
+msgstr ""
+"도움말\n"
+
+#: src/hdmiosd.cpp:57
+msgid ""
+"version\n"
+"\n"
+msgstr ""
+"버전\n"
+"\n"
+
+#: src/hdmiosd.cpp:58
+#, c-format
+msgid "Settings: %s\n"
+msgstr ""
+"설정: %s\n"
+
+#: src/hdmiosd.cpp:59
+#, c-format
+msgid "Report bugs to: <%s>\n"
+msgstr ""
+"버그 보고: <%s>\n"
+
+#: src/osd_frame.cpp:89 src/osd_frame.cpp:633
+msgid "Scanning displays…"
+msgstr "디스플레이 검색 중…"
+
+#: src/osd_frame.cpp:181
+msgid "Failed to load theme"
+msgstr "테마 로드 실패"
+
+#: src/osd_frame.cpp:192
+msgid "Theme applied"
+msgstr "테마 적용됨"
+
+#: src/osd_frame.cpp:198
+msgid "No minor-themes found (set MINOR_THEMES_DIR)"
+msgstr "minor-themes 없음(MINOR_THEMES_DIR 설정)"
+
+#: src/osd_frame.cpp:232
+msgid "— Light —"
+msgstr "— 라이트 —"
+
+#: src/osd_frame.cpp:239
+msgid "— Dark —"
+msgstr "— 다크 —"
+
+#: src/osd_frame.cpp:246
+msgid "Minor"
+msgstr "Minor"
+
+#: src/osd_frame.cpp:247
+msgid "Vibe"
+msgstr "Vibe"
+
+#: src/osd_frame.cpp:248
+msgid "Country"
+msgstr "국가"
+
+#: src/osd_frame.cpp:276
+msgid "Opacity %"
+msgstr "불투명도 %"
+
+#: src/osd_frame.cpp:277
+msgid "Width"
+msgstr "너비"
+
+#: src/osd_frame.cpp:278
+msgid "Height"
+msgstr "높이"
+
+#: src/osd_frame.cpp:280
+msgid "Margin left"
+msgstr "왼쪽 여백"
+
+#: src/osd_frame.cpp:281
+msgid "Margin right"
+msgstr "오른쪽 여백"
+
+#: src/osd_frame.cpp:282
+msgid "Margin top"
+msgstr "위쪽 여백"
+
+#: src/osd_frame.cpp:283
+msgid "Margin bottom"
+msgstr "아래쪽 여백"
+
+#: src/osd_frame.cpp:439
+#, c-format
+msgid "Found %zu display(s)…"
+msgstr "디스플레이 %zu대 발견…"
+
+#: src/osd_frame.cpp:449
+msgid "No DDC-capable displays found"
+msgstr "DDC 지원 디스플레이 없음"
+
+#: src/osd_frame.cpp:497
+msgid "Ready"
+msgstr "준비됨"
+
+#: src/osd_frame.cpp:550
+msgid "Reading controls…"
+msgstr "컨트롤 읽는 중…"
+
+#: src/osd_frame.cpp:572 src/osd_frame.cpp:696
+msgid "Cannot open display"
+msgstr "디스플레이를 열 수 없음"
+
+#: src/osd_frame.cpp:619
+msgid "No display"
+msgstr "디스플레이 없음"
+
+#: src/osd_frame.cpp:686
+msgid "App OSD updated"
+msgstr "앱 OSD 업데이트됨"
+
+#: src/osd_frame.cpp:771
+msgid "Nothing to undo"
+msgstr "실행 취소할 항목 없음"
+
+#: src/osd_frame.cpp:783
+msgid "Already at default"
+msgstr "이미 기본값임"
+
+#: src/osd_frame.cpp:787
+msgid "Reset to default"
+msgstr "기본값으로 재설정됨"
+
+#: src/osd_frame.cpp:835
+msgid "Preset failed"
+msgstr "프리셋 실패"
+
+#: src/osd_frame.cpp:841
+msgid "Factory reset - refreshed all"
+msgstr "공장 초기화 — 모두 새로고침됨"
+
+#: src/osd_frame.cpp:844
+msgid "Preset applied - refreshed related"
+msgstr "프리셋 적용 — 관련 항목 새로고침"
+
+#: src/osd_frame.cpp:936
+msgid "loading"
+msgstr "로딩 중"
+
+#: src/osd_frame.cpp:958
+msgid "Refresh"
+msgstr "새로고침"
+
+#: src/osd_frame.cpp:959
+msgid "Theme"
+msgstr "테마"
+
+#: src/vcp.cpp:17
+msgid "sRGB"
+msgstr "sRGB"
+
+#: src/vcp.cpp:17
+msgid "Native"
+msgstr "기본"
+
+#: src/vcp.cpp:17 src/vcp.cpp:28
+msgid "5000 K"
+msgstr "5000 K"
+
+#: src/vcp.cpp:17 src/vcp.cpp:28
+msgid "6500 K"
+msgstr "6500 K"
+
+#: src/vcp.cpp:18 src/vcp.cpp:29
+msgid "7500 K"
+msgstr "7500 K"
+
+#: src/vcp.cpp:18 src/vcp.cpp:29
+msgid "9300 K"
+msgstr "9300 K"
+
+#: src/vcp.cpp:18
+msgid "User"
+msgstr "사용자"
+
+#: src/vcp.cpp:18
+msgid "User 1"
+msgstr "사용자 1"
+
+#: src/vcp.cpp:28
+msgid "6000 K"
+msgstr "6000 K"
+
+#: src/vcp.cpp:29
+msgid "8500 K"
+msgstr "8500 K"
+
+#: src/vcp.cpp:32
+msgid "VGA-1"
+msgstr "VGA-1"
+
+#: src/vcp.cpp:32
+msgid "DVI-1"
+msgstr "DVI-1"
+
+#: src/vcp.cpp:32
+msgid "DVI-2"
+msgstr "DVI-2"
+
+#: src/vcp.cpp:32
+msgid "DisplayPort-1"
+msgstr "DisplayPort-1"
+
+#: src/vcp.cpp:33
+msgid "DisplayPort-2"
+msgstr "DisplayPort-2"
+
+#: src/vcp.cpp:33
+msgid "HDMI-1"
+msgstr "HDMI-1"
+
+#: src/vcp.cpp:33
+msgid "HDMI-2"
+msgstr "HDMI-2"
+
+#: src/vcp.cpp:36
+msgid "Chinese (trad.)"
+msgstr "중국어(번체)"
+
+#: src/vcp.cpp:36
+msgid "English"
+msgstr "영어"
+
+#: src/vcp.cpp:36
+msgid "French"
+msgstr "프랑스어"
+
+#: src/vcp.cpp:36
+msgid "German"
+msgstr "독일어"
+
+#: src/vcp.cpp:37
+msgid "Japanese"
+msgstr "일본어"
+
+#: src/vcp.cpp:37
+msgid "Spanish"
+msgstr "스페인어"
+
+#: src/vcp.cpp:37
+msgid "Chinese (simp.)"
+msgstr "중국어(간체)"
+
+#: src/vcp.cpp:40
+msgid "On"
+msgstr "켜짐"
+
+#: src/vcp.cpp:40
+msgid "Off"
+msgstr "꺼짐"
+
+#: src/vcp.cpp:40
+msgid "Power off"
+msgstr "전원 끄기"
+
+#: src/vcp.cpp:42
+msgid "Muted"
+msgstr "음소거됨"
+
+#: src/vcp.cpp:42
+msgid "Unmuted"
+msgstr "음소거 해제"
+
+#: src/vcp.cpp:49 src/vcp.cpp:101
+msgid "Brightness"
+msgstr "밝기"
+
+#: src/vcp.cpp:50
+msgid "Contrast"
+msgstr "대비"
+
+#: src/vcp.cpp:51
+msgid "Backlight"
+msgstr "백라이트"
+
+#: src/vcp.cpp:52
+msgid "Backlight white"
+msgstr "화이트 백라이트"
+
+#: src/vcp.cpp:54
+msgid "Sharpness"
+msgstr "선명도"
+
+#: src/vcp.cpp:55
+msgid "Display scaling"
+msgstr "디스플레이 배율"
+
+#: src/vcp.cpp:56
+msgid "Scan mode"
+msgstr "스캔 모드"
+
+#: src/vcp.cpp:57
+msgid "Display application"
+msgstr "디스플레이 응용"
+
+#: src/vcp.cpp:58
+msgid "Sub-pixel layout"
+msgstr "서브픽셀 배치"
+
+#: src/vcp.cpp:59
+msgid "Technology type"
+msgstr "기술 유형"
+
+#: src/vcp.cpp:61
+msgid "Color preset"
+msgstr "색상 프리셋"
+
+#: src/vcp.cpp:63
+msgid "Color temp mode"
+msgstr "색온도 모드"
+
+#: src/vcp.cpp:65
+msgid "Color temp. step"
+msgstr "색온도 단계"
+
+#: src/vcp.cpp:66
+msgid "Gain red"
+msgstr "게인 빨강"
+
+#: src/vcp.cpp:67
+msgid "Gain green"
+msgstr "게인 초록"
+
+#: src/vcp.cpp:68
+msgid "Gain blue"
+msgstr "게인 파랑"
+
+#: src/vcp.cpp:69
+msgid "Black level red"
+msgstr "블랙 레벨 빨강"
+
+#: src/vcp.cpp:70
+msgid "Black level green"
+msgstr "블랙 레벨 초록"
+
+#: src/vcp.cpp:71
+msgid "Black level blue"
+msgstr "블랙 레벨 파랑"
+
+#: src/vcp.cpp:73
+msgid "Speaker volume"
+msgstr "스피커 볼륨"
+
+#: src/vcp.cpp:74
+msgid "Audio mute"
+msgstr "오디오 음소거"
+
+#: src/vcp.cpp:76
+msgid "Treble"
+msgstr "고음"
+
+#: src/vcp.cpp:77
+msgid "Bass"
+msgstr "저음"
+
+#: src/vcp.cpp:78
+msgid "Balance"
+msgstr "밸런스"
+
+#: src/vcp.cpp:80
+msgid "OSD control"
+msgstr "OSD 제어"
+
+#: src/vcp.cpp:81
+msgid "OSD language"
+msgstr "OSD 언어"
+
+#: src/vcp.cpp:84
+msgid "Factory defaults"
+msgstr "공장 기본값"
+
+#: src/vcp.cpp:85
+msgid "Factory brightness/contrast"
+msgstr "공장 밝기/대비"
+
+#: src/vcp.cpp:86
+msgid "Factory geometry"
+msgstr "공장 지오메트리"
+
+#: src/vcp.cpp:87
+msgid "Factory color"
+msgstr "공장 색상"
+
+#: src/vcp.cpp:89
+msgid "Input source"
+msgstr "입력 소스"
+
+#: src/vcp.cpp:91
+msgid "Power mode"
+msgstr "전원 모드"
+
+#: src/vcp.cpp:93
+msgid "Horizontal frequency"
+msgstr "수평 주파수"
+
+#: src/vcp.cpp:94
+msgid "Vertical frequency"
+msgstr "수직 주파수"
+
+#: src/vcp.cpp:95
+msgid "VCP version"
+msgstr "VCP 버전"
+
+#: src/vcp.cpp:103
+msgid "Image"
+msgstr "이미지"
+
+#: src/vcp.cpp:105
+msgid "Color"
+msgstr "색상"
+
+#: src/vcp.cpp:107
+msgid "Audio"
+msgstr "오디오"
+
+#: src/vcp.cpp:109
+msgid "OSD"
+msgstr "OSD"
+
+#: src/vcp.cpp:111
+msgid "Presets"
+msgstr "프리셋"
+
+#: src/vcp.cpp:113
+msgid "Misc"
+msgstr "기타"
+
+#: src/vcp.cpp:115
+msgid "App OSD"
+msgstr "앱 OSD"
+
+#: src/vcp.cpp:117
+msgid "Unknown"
+msgstr "알 수 없음"
+

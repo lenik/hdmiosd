@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Monitor bezel -->
+  <rect x="5" y="8" width="54" height="38" rx="5" stroke="#FFFFFF" stroke-width="3"/>
+  <!-- Screen -->
+  <rect x="10" y="13" width="44" height="28" rx="2" fill="#1A2A40"/>
+  <!-- OSD slider track -->
+  <rect x="16" y="22" width="32" height="6" rx="3" fill="#3A4A60"/>
+  <!-- OSD slider fill -->
+  <rect x="16" y="22" width="20" height="6" rx="3" fill="#5CB0FF"/>
+  <!-- OSD secondary bar -->
+  <rect x="16" y="32" width="32" height="4" rx="2" fill="#3A4A60"/>
+  <rect x="16" y="32" width="12" height="4" rx="2" fill="#FFFFFF" opacity="0.85"/>
+  <!-- Stand -->
+  <path d="M26 46h12v3a5 5 0 01-5 5h-2a5 5 0 01-5-5v-3z" fill="#FFFFFF"/>
+  <rect x="20" y="54" width="24" height="3" rx="1.5" fill="#FFFFFF"/>
+</svg>

@@ -1,3 +1,43 @@
+hdmiosd (0.2.0) unstable; urgency=medium
+
+  * Refactor to C++ / wxWidgets with canvas OSD and embedded assets.
+  * Split Device OSD vs App OSD; persist settings.ini under
+    ~/.config/hdmiosd/.
+  * Embed Tabler icons via assets.zip + bas-cpp ZipVolume Assets.
+  * Treat VCP 0x0C as discrete white-point modes (5k/6.5k/…), not a
+    linear Kelvin slider.
+  * Borderless OSD centered on the pointer's display; App OSD under
+    Device OSD; single Refresh for displays and controls.
+  * Discrete controls use grayable < > arrows; white Tabler icons with
+    vertical icon/label alignment; SVG app icon.
+  * Theme switcher (minor / vibe / country, light then dark) via
+    minor-themes JSON palettes.
+  * Show the OSD immediately; discover displays and read VCP controls
+    asynchronously with progressive UI updates.
+  * Add gettext catalogs for L1 locales (ar, de, es_MX, fr, it, ja, ko,
+    zh_CN).
+
+ -- Lenik (谢继雷) <lenik@bodz.net>  Fri, 30 Oct 2026 15:35:00 +0800
+
+hdmiosd (0.1.0) unstable; urgency=medium
+
+  * On-screen DDC/CI controller for HDMI/DP displays.
+  * Implement direct DDC/CI over Linux I2C (no ddcutil).
+  * Discover displays via DRM connectors and /dev/i2c-*; -d resolves
+    related buses.
+  * GTK3 OSD UI with feature tabs, opacity/geometry/placement, keyboard
+    shortcuts.
+  * Build against gtk+-3.0; refresh man page, README, and bash
+    completion.
+  * Canvas OSD UI with highlighted active control, Tab cycling, and
+    aligned presets.
+  * Per-control undo history and reset-to-baseline; refresh
+    displays/controls.
+  * Show color temperature as Kelvin; enable RGB gain via User preset;
+    hide empty Audio.
+
+ -- Lenik (谢继雷) <lenik@bodz.net>  Fri, 30 Oct 2026 14:08:09 +0800
+
 hdmiosd (0.0.1) unstable; urgency=medium
 
   * Initial release

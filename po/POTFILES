@@ -1,0 +1,3 @@
+src/hdmiosd.cpp
+src/osd_frame.cpp
+src/vcp.cpp

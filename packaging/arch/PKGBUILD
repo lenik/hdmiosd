@@ -3,12 +3,12 @@
 pkgname=hdmiosd
 pkgver=0.0.0
 pkgrel=1
-pkgdesc="Meson-based CLI template"
-arch=('any')
+pkgdesc="On-screen DDC/CI controller for HDMI/DP displays"
+arch=('x86_64')
 url="https://github.com/lenik/hdmiosd"
 license=('AGPL-3.0-or-later')
-depends=('bash')
-makedepends=('meson' 'ninja' 'asciidoctor')
+depends=('wxwidgets-gtk3' 'bas-cpp' 'bas-ui')
+makedepends=('meson' 'ninja' 'asciidoctor' 'pkgconf' 'zip' 'binutils' 'nlohmann-json' 'gettext')
 source=()
 sha256sums=()
 

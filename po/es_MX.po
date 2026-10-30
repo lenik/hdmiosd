@@ -1,0 +1,518 @@
+# Translations for hdmiosd.
+# Copyright (C) 2026 Lenik
+# This file is distributed under the same license as the hdmiosd package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: hdmiosd 0.2.0\n"
+"Report-Msgid-Bugs-To: hdmiosd@bodz.net\n"
+"PO-Revision-Date: 2026-10-30 15:30+0800\n"
+"Last-Translator: Lenik <hdmiosd@bodz.net>\n"
+"Language-Team: Spanish (Mexico)\n"
+"Language: es_MX\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/hdmiosd.cpp:31
+msgid ""
+"Usage: hdmiosd [OPTION]...\n"
+"Control HDMI/DP monitor settings via DDC/CI (Device OSD) and App OSD.\n"
+"\n"
+msgstr ""
+"Uso: hdmiosd [OPCIÓN]...\n"
+"Controla monitores HDMI/DP vía DDC/CI (OSD del dispositivo y OSD de la app).\n"
+"\n"
+
+#: src/hdmiosd.cpp:35
+msgid "/dev/i2c-*, /dev/video*, PCI/USB id, or /sys/... path\n"
+msgstr ""
+"/dev/i2c-*, /dev/video*, id PCI/USB o ruta /sys/...\n"
+
+#: src/hdmiosd.cpp:37
+msgid "window opacity 0-100 (overrides settings.ini)\n"
+msgstr ""
+"opacidad de ventana 0–100 (anula settings.ini)\n"
+
+#: src/hdmiosd.cpp:39
+msgid "window size\n"
+msgstr ""
+"tamaño de ventana\n"
+
+#: src/hdmiosd.cpp:41
+msgid "place from left edge\n"
+msgstr ""
+"colocar desde el borde izquierdo\n"
+
+#: src/hdmiosd.cpp:43
+msgid "place from right edge\n"
+msgstr ""
+"colocar desde el borde derecho\n"
+
+#: src/hdmiosd.cpp:45
+msgid "place from top edge\n"
+msgstr ""
+"colocar desde el borde superior\n"
+
+#: src/hdmiosd.cpp:47
+msgid "place from bottom edge\n"
+msgstr ""
+"colocar desde el borde inferior\n"
+
+#: src/hdmiosd.cpp:49
+msgid "list DDC-capable displays and exit\n"
+msgstr ""
+"listar pantallas con DDC y salir\n"
+
+#: src/hdmiosd.cpp:51
+msgid "more logging\n"
+msgstr ""
+"más registros\n"
+
+#: src/hdmiosd.cpp:53
+msgid "less logging\n"
+msgstr ""
+"menos registros\n"
+
+#: src/hdmiosd.cpp:55
+msgid "help\n"
+msgstr ""
+"ayuda\n"
+
+#: src/hdmiosd.cpp:57
+msgid ""
+"version\n"
+"\n"
+msgstr ""
+"versión\n"
+"\n"
+
+#: src/hdmiosd.cpp:58
+#, c-format
+msgid "Settings: %s\n"
+msgstr ""
+"Ajustes: %s\n"
+
+#: src/hdmiosd.cpp:59
+#, c-format
+msgid "Report bugs to: <%s>\n"
+msgstr ""
+"Reportar errores a: <%s>\n"
+
+#: src/osd_frame.cpp:89 src/osd_frame.cpp:633
+msgid "Scanning displays…"
+msgstr "Buscando pantallas…"
+
+#: src/osd_frame.cpp:181
+msgid "Failed to load theme"
+msgstr "Error al cargar el tema"
+
+#: src/osd_frame.cpp:192
+msgid "Theme applied"
+msgstr "Tema aplicado"
+
+#: src/osd_frame.cpp:198
+msgid "No minor-themes found (set MINOR_THEMES_DIR)"
+msgstr "No hay minor-themes (defina MINOR_THEMES_DIR)"
+
+#: src/osd_frame.cpp:232
+msgid "— Light —"
+msgstr "— Claro —"
+
+#: src/osd_frame.cpp:239
+msgid "— Dark —"
+msgstr "— Oscuro —"
+
+#: src/osd_frame.cpp:246
+msgid "Minor"
+msgstr "Minor"
+
+#: src/osd_frame.cpp:247
+msgid "Vibe"
+msgstr "Vibe"
+
+#: src/osd_frame.cpp:248
+msgid "Country"
+msgstr "País"
+
+#: src/osd_frame.cpp:276
+msgid "Opacity %"
+msgstr "Opacidad %"
+
+#: src/osd_frame.cpp:277
+msgid "Width"
+msgstr "Ancho"
+
+#: src/osd_frame.cpp:278
+msgid "Height"
+msgstr "Alto"
+
+#: src/osd_frame.cpp:280
+msgid "Margin left"
+msgstr "Margen izquierdo"
+
+#: src/osd_frame.cpp:281
+msgid "Margin right"
+msgstr "Margen derecho"
+
+#: src/osd_frame.cpp:282
+msgid "Margin top"
+msgstr "Margen superior"
+
+#: src/osd_frame.cpp:283
+msgid "Margin bottom"
+msgstr "Margen inferior"
+
+#: src/osd_frame.cpp:439
+#, c-format
+msgid "Found %zu display(s)…"
+msgstr "%zu pantalla(s) encontrada(s)…"
+
+#: src/osd_frame.cpp:449
+msgid "No DDC-capable displays found"
+msgstr "No se encontraron pantallas con DDC"
+
+#: src/osd_frame.cpp:497
+msgid "Ready"
+msgstr "Listo"
+
+#: src/osd_frame.cpp:550
+msgid "Reading controls…"
+msgstr "Leyendo controles…"
+
+#: src/osd_frame.cpp:572 src/osd_frame.cpp:696
+msgid "Cannot open display"
+msgstr "No se puede abrir la pantalla"
+
+#: src/osd_frame.cpp:619
+msgid "No display"
+msgstr "Sin pantalla"
+
+#: src/osd_frame.cpp:686
+msgid "App OSD updated"
+msgstr "OSD de la app actualizado"
+
+#: src/osd_frame.cpp:771
+msgid "Nothing to undo"
+msgstr "Nada que deshacer"
+
+#: src/osd_frame.cpp:783
+msgid "Already at default"
+msgstr "Ya está en el valor predeterminado"
+
+#: src/osd_frame.cpp:787
+msgid "Reset to default"
+msgstr "Restablecido al valor predeterminado"
+
+#: src/osd_frame.cpp:835
+msgid "Preset failed"
+msgstr "Falló el ajuste preestablecido"
+
+#: src/osd_frame.cpp:841
+msgid "Factory reset - refreshed all"
+msgstr "Restablecimiento de fábrica — todo actualizado"
+
+#: src/osd_frame.cpp:844
+msgid "Preset applied - refreshed related"
+msgstr "Ajuste aplicado — relacionados actualizados"
+
+#: src/osd_frame.cpp:936
+msgid "loading"
+msgstr "cargando"
+
+#: src/osd_frame.cpp:958
+msgid "Refresh"
+msgstr "Actualizar"
+
+#: src/osd_frame.cpp:959
+msgid "Theme"
+msgstr "Tema"
+
+#: src/vcp.cpp:17
+msgid "sRGB"
+msgstr "sRGB"
+
+#: src/vcp.cpp:17
+msgid "Native"
+msgstr "Nativo"
+
+#: src/vcp.cpp:17 src/vcp.cpp:28
+msgid "5000 K"
+msgstr "5000 K"
+
+#: src/vcp.cpp:17 src/vcp.cpp:28
+msgid "6500 K"
+msgstr "6500 K"
+
+#: src/vcp.cpp:18 src/vcp.cpp:29
+msgid "7500 K"
+msgstr "7500 K"
+
+#: src/vcp.cpp:18 src/vcp.cpp:29
+msgid "9300 K"
+msgstr "9300 K"
+
+#: src/vcp.cpp:18
+msgid "User"
+msgstr "Usuario"
+
+#: src/vcp.cpp:18
+msgid "User 1"
+msgstr "Usuario 1"
+
+#: src/vcp.cpp:28
+msgid "6000 K"
+msgstr "6000 K"
+
+#: src/vcp.cpp:29
+msgid "8500 K"
+msgstr "8500 K"
+
+#: src/vcp.cpp:32
+msgid "VGA-1"
+msgstr "VGA-1"
+
+#: src/vcp.cpp:32
+msgid "DVI-1"
+msgstr "DVI-1"
+
+#: src/vcp.cpp:32
+msgid "DVI-2"
+msgstr "DVI-2"
+
+#: src/vcp.cpp:32
+msgid "DisplayPort-1"
+msgstr "DisplayPort-1"
+
+#: src/vcp.cpp:33
+msgid "DisplayPort-2"
+msgstr "DisplayPort-2"
+
+#: src/vcp.cpp:33
+msgid "HDMI-1"
+msgstr "HDMI-1"
+
+#: src/vcp.cpp:33
+msgid "HDMI-2"
+msgstr "HDMI-2"
+
+#: src/vcp.cpp:36
+msgid "Chinese (trad.)"
+msgstr "Chino (trad.)"
+
+#: src/vcp.cpp:36
+msgid "English"
+msgstr "Inglés"
+
+#: src/vcp.cpp:36
+msgid "French"
+msgstr "Francés"
+
+#: src/vcp.cpp:36
+msgid "German"
+msgstr "Alemán"
+
+#: src/vcp.cpp:37
+msgid "Japanese"
+msgstr "Japonés"
+
+#: src/vcp.cpp:37
+msgid "Spanish"
+msgstr "Español"
+
+#: src/vcp.cpp:37
+msgid "Chinese (simp.)"
+msgstr "Chino (simp.)"
+
+#: src/vcp.cpp:40
+msgid "On"
+msgstr "Encendido"
+
+#: src/vcp.cpp:40
+msgid "Off"
+msgstr "Apagado"
+
+#: src/vcp.cpp:40
+msgid "Power off"
+msgstr "Apagar"
+
+#: src/vcp.cpp:42
+msgid "Muted"
+msgstr "Silenciado"
+
+#: src/vcp.cpp:42
+msgid "Unmuted"
+msgstr "Sin silencio"
+
+#: src/vcp.cpp:49 src/vcp.cpp:101
+msgid "Brightness"
+msgstr "Brillo"
+
+#: src/vcp.cpp:50
+msgid "Contrast"
+msgstr "Contraste"
+
+#: src/vcp.cpp:51
+msgid "Backlight"
+msgstr "Luz de fondo"
+
+#: src/vcp.cpp:52
+msgid "Backlight white"
+msgstr "Luz de fondo blanca"
+
+#: src/vcp.cpp:54
+msgid "Sharpness"
+msgstr "Nitidez"
+
+#: src/vcp.cpp:55
+msgid "Display scaling"
+msgstr "Escalado"
+
+#: src/vcp.cpp:56
+msgid "Scan mode"
+msgstr "Modo de barrido"
+
+#: src/vcp.cpp:57
+msgid "Display application"
+msgstr "Aplicación de pantalla"
+
+#: src/vcp.cpp:58
+msgid "Sub-pixel layout"
+msgstr "Disposición de subpíxeles"
+
+#: src/vcp.cpp:59
+msgid "Technology type"
+msgstr "Tipo de tecnología"
+
+#: src/vcp.cpp:61
+msgid "Color preset"
+msgstr "Ajuste de color"
+
+#: src/vcp.cpp:63
+msgid "Color temp mode"
+msgstr "Modo de temperatura de color"
+
+#: src/vcp.cpp:65
+msgid "Color temp. step"
+msgstr "Paso de temperatura de color"
+
+#: src/vcp.cpp:66
+msgid "Gain red"
+msgstr "Ganancia roja"
+
+#: src/vcp.cpp:67
+msgid "Gain green"
+msgstr "Ganancia verde"
+
+#: src/vcp.cpp:68
+msgid "Gain blue"
+msgstr "Ganancia azul"
+
+#: src/vcp.cpp:69
+msgid "Black level red"
+msgstr "Nivel de negro rojo"
+
+#: src/vcp.cpp:70
+msgid "Black level green"
+msgstr "Nivel de negro verde"
+
+#: src/vcp.cpp:71
+msgid "Black level blue"
+msgstr "Nivel de negro azul"
+
+#: src/vcp.cpp:73
+msgid "Speaker volume"
+msgstr "Volumen de altavoces"
+
+#: src/vcp.cpp:74
+msgid "Audio mute"
+msgstr "Silencio de audio"
+
+#: src/vcp.cpp:76
+msgid "Treble"
+msgstr "Agudos"
+
+#: src/vcp.cpp:77
+msgid "Bass"
+msgstr "Graves"
+
+#: src/vcp.cpp:78
+msgid "Balance"
+msgstr "Balance"
+
+#: src/vcp.cpp:80
+msgid "OSD control"
+msgstr "Control OSD"
+
+#: src/vcp.cpp:81
+msgid "OSD language"
+msgstr "Idioma OSD"
+
+#: src/vcp.cpp:84
+msgid "Factory defaults"
+msgstr "Valores de fábrica"
+
+#: src/vcp.cpp:85
+msgid "Factory brightness/contrast"
+msgstr "Brillo/contraste de fábrica"
+
+#: src/vcp.cpp:86
+msgid "Factory geometry"
+msgstr "Geometría de fábrica"
+
+#: src/vcp.cpp:87
+msgid "Factory color"
+msgstr "Color de fábrica"
+
+#: src/vcp.cpp:89
+msgid "Input source"
+msgstr "Fuente de entrada"
+
+#: src/vcp.cpp:91
+msgid "Power mode"
+msgstr "Modo de energía"
+
+#: src/vcp.cpp:93
+msgid "Horizontal frequency"
+msgstr "Frecuencia horizontal"
+
+#: src/vcp.cpp:94
+msgid "Vertical frequency"
+msgstr "Frecuencia vertical"
+
+#: src/vcp.cpp:95
+msgid "VCP version"
+msgstr "Versión VCP"
+
+#: src/vcp.cpp:103
+msgid "Image"
+msgstr "Imagen"
+
+#: src/vcp.cpp:105
+msgid "Color"
+msgstr "Color"
+
+#: src/vcp.cpp:107
+msgid "Audio"
+msgstr "Audio"
+
+#: src/vcp.cpp:109
+msgid "OSD"
+msgstr "OSD"
+
+#: src/vcp.cpp:111
+msgid "Presets"
+msgstr "Ajustes preestablecidos"
+
+#: src/vcp.cpp:113
+msgid "Misc"
+msgstr "Varios"
+
+#: src/vcp.cpp:115
+msgid "App OSD"
+msgstr "OSD de la app"
+
+#: src/vcp.cpp:117
+msgid "Unknown"
+msgstr "Desconocido"
+

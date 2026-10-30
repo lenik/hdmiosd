@@ -1,8 +1,8 @@
 Source: hdmiosd
 Section: utils
 Priority: optional
-Maintainer: Lenik <hdmiosd@bodz.net>
-Build-Depends: debhelper-compat (= 13), meson, ninja-build, pkgconf, libbas-c-dev, asciidoctor
+Maintainer: Lenik (谢继雷) <hdmiosd@bodz.net>
+Build-Depends: debhelper-compat (= 13), meson, ninja-build, pkgconf, libbas-cpp-dev, libbas-ui-dev, libwxgtk3.2-dev, nlohmann-json3-dev, gettext, asciidoctor, zip, binutils
 Standards-Version: 4.6.0
 Homepage: https://github.com/lenik/hdmiosd
 Rules-Requires-Root: no
@@ -12,7 +12,9 @@ Architecture: any
 Depends:
     ${shlibs:Depends},
     ${misc:Depends}
-Description: Simple C CLI project template with example app
- hdmiosd is a Meson-based template for small C command-line utilities
- (no shared/static library packaging). It ships the hdmiosd example
- application, AsciiDoc man pages, bash completion, and Debian packaging.
+Description: On-screen DDC/CI controller for HDMI/DP displays
+ hdmiosd discovers DDC/CI-capable monitors over Linux I2C and provides a
+ wxWidgets canvas OSD to adjust brightness, contrast, color, and related
+ VCP features (Device OSD), plus App OSD window settings stored in
+ ~/.config/hdmiosd/settings.ini. Tabler icons are embedded via bas-cpp
+ assets.

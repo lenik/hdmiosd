@@ -1,6 +1,6 @@
 project(
     'hdmiosd',
-    'c',
+    ['c', 'cpp'],
     version: run_command(
         'sh',
         '-c', '''
@@ -21,6 +21,7 @@ project(
     license: 'AGPL-3.0-or-later',
     default_options: [
         'c_std=c99',
+        'cpp_std=c++17',
         'warning_level=2',
     ],
 )
@@ -29,6 +30,7 @@ project_author = 'Lenik'
 project_email = 'hdmiosd@bodz.net'
 project_year = 2026
 
+cpp = meson.get_compiler('cpp')
 asciidoctor = find_program('asciidoctor', required: true)
 fs = import('fs')
 
@@ -51,44 +53,80 @@ configure_file(
     configuration: config_h,
 )
 
-bas_c_dep = dependency('bas-c', required: true)
-bas_args = ['-DLOGGER_NAME=' + meson.project_name(), '-DTEXT_DOMAIN=' + meson.project_name()]
+bas_cpp_dep = dependency('bas-cpp', required: true)
+bas_ui_dep = dependency('bas-ui', required: true)
+wx_dep = dependency('wxwidgets', modules: ['base', 'core'], required: true)
+nlohmann_json_dep = dependency('nlohmann_json', required: true)
+
+bas_args = [
+    '-DLOGGER_NAME=' + meson.project_name(),
+    '-DTEXT_DOMAIN=' + meson.project_name(),
+    '-DASSETS_NAME=hdmiosd',
+]
+
+lib_objects = []
+assets_dir = meson.current_source_dir() / 'assets'
+assets_src = 'src/assets.s'
+if fs.exists(assets_dir) and fs.exists(assets_src)
+    assets_zip = custom_target(
+        'assets_zip',
+        output: 'assets.zip',
+        input: [],
+        command: [
+            'sh',
+            '-c', 'dst=$(readlink -f "@1@"); cd "@0@" && zip -qr "$dst" .'.format(assets_dir, '@OUTPUT@'),
+        ],
+        build_by_default: true,
+        install: false,
+    )
+    assets_s = configure_file(
+        input: 'src/assets.s',
+        output: 'assets.s',
+        copy: true,
+    )
+    as_prog = find_program('as', required: true)
+    assets_o = custom_target(
+        'assets_o',
+        output: 'assets.o',
+        input: [assets_s, assets_zip],
+        command: [as_prog, '-o', '@OUTPUT@', '@INPUT0@'],
+        depends: assets_zip,
+    )
+    lib_objects += [assets_o]
+endif
 
 inc = include_directories('src', '.')
 
-app_sources = [
-    'src/hdmiosd.c',
+nowarn = cpp.get_supported_arguments(['-Wno-deprecated-declarations'])
+
+sources = [
+    'src/module.cpp',
+    'src/ddc.cpp',
+    'src/vcp.cpp',
+    'src/display.cpp',
+    'src/settings.cpp',
+    'src/icons.cpp',
+    'src/theme.cpp',
+    'src/osd_frame.cpp',
+    'src/hdmiosd.cpp',
 ]
 
-common_sources = [
-    'src/commons.c',
-]
+executable(
+    'hdmiosd',
+    sources,
+    objects: lib_objects,
+    include_directories: inc,
+    dependencies: [bas_cpp_dep, bas_ui_dep, wx_dep, nlohmann_json_dep],
+    cpp_args: bas_args + nowarn,
+    install: true,
+    install_dir: bindir,
+)
 
-foreach source : app_sources
-    name = fs.stem(source.split('/')[-1])
-    executable(
-        name,
-        [source] + common_sources,
-        include_directories: inc,
-        dependencies: [bas_c_dep],
-        c_args: bas_args,
-        install: true,
-        install_dir: bindir,
-    )
-endforeach
-
-bash_files = [
+install_data(
     'hdmiosd.bash',
-]
-
-foreach file : bash_files
-    name = fs.stem(file)
-    install_data(
-        file,
-        install_dir: datadir / 'bash-completion' / 'completions',
-        rename: name,
-    )
-endforeach
+    install_dir: datadir / 'bash-completion' / 'completions',
+    rename: 'hdmiosd',
+)
 
 install_data(
     [
@@ -118,6 +156,7 @@ custom_target(
     install_dir: mandir / 'man1',
 )
 
+subdir('po')
 subdir('tests')
 
 run_target(

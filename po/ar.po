@@ -1,0 +1,518 @@
+# Translations for hdmiosd.
+# Copyright (C) 2026 Lenik
+# This file is distributed under the same license as the hdmiosd package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: hdmiosd 0.2.0\n"
+"Report-Msgid-Bugs-To: hdmiosd@bodz.net\n"
+"PO-Revision-Date: 2026-10-30 15:30+0800\n"
+"Last-Translator: Lenik <hdmiosd@bodz.net>\n"
+"Language-Team: Arabic\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/hdmiosd.cpp:31
+msgid ""
+"Usage: hdmiosd [OPTION]...\n"
+"Control HDMI/DP monitor settings via DDC/CI (Device OSD) and App OSD.\n"
+"\n"
+msgstr ""
+"الاستخدام: hdmiosd [خيار]...\n"
+"التحكم في شاشات HDMI/DP عبر DDC/CI (OSD الجهاز وOSD التطبيق).\n"
+"\n"
+
+#: src/hdmiosd.cpp:35
+msgid "/dev/i2c-*, /dev/video*, PCI/USB id, or /sys/... path\n"
+msgstr ""
+"/dev/i2c-* أو /dev/video* أو معرّف PCI/USB أو مسار /sys/...\n"
+
+#: src/hdmiosd.cpp:37
+msgid "window opacity 0-100 (overrides settings.ini)\n"
+msgstr ""
+"شفافية النافذة 0–100 (يتجاوز settings.ini)\n"
+
+#: src/hdmiosd.cpp:39
+msgid "window size\n"
+msgstr ""
+"حجم النافذة\n"
+
+#: src/hdmiosd.cpp:41
+msgid "place from left edge\n"
+msgstr ""
+"الموضع من الحافة اليسرى\n"
+
+#: src/hdmiosd.cpp:43
+msgid "place from right edge\n"
+msgstr ""
+"الموضع من الحافة اليمنى\n"
+
+#: src/hdmiosd.cpp:45
+msgid "place from top edge\n"
+msgstr ""
+"الموضع من الحافة العلوية\n"
+
+#: src/hdmiosd.cpp:47
+msgid "place from bottom edge\n"
+msgstr ""
+"الموضع من الحافة السفلية\n"
+
+#: src/hdmiosd.cpp:49
+msgid "list DDC-capable displays and exit\n"
+msgstr ""
+"سرد الشاشات التي تدعم DDC ثم الخروج\n"
+
+#: src/hdmiosd.cpp:51
+msgid "more logging\n"
+msgstr ""
+"المزيد من السجلات\n"
+
+#: src/hdmiosd.cpp:53
+msgid "less logging\n"
+msgstr ""
+"سجلات أقل\n"
+
+#: src/hdmiosd.cpp:55
+msgid "help\n"
+msgstr ""
+"مساعدة\n"
+
+#: src/hdmiosd.cpp:57
+msgid ""
+"version\n"
+"\n"
+msgstr ""
+"الإصدار\n"
+"\n"
+
+#: src/hdmiosd.cpp:58
+#, c-format
+msgid "Settings: %s\n"
+msgstr ""
+"الإعدادات: %s\n"
+
+#: src/hdmiosd.cpp:59
+#, c-format
+msgid "Report bugs to: <%s>\n"
+msgstr ""
+"أبلغ عن الأخطاء إلى: <%s>\n"
+
+#: src/osd_frame.cpp:89 src/osd_frame.cpp:633
+msgid "Scanning displays…"
+msgstr "جارٍ البحث عن الشاشات…"
+
+#: src/osd_frame.cpp:181
+msgid "Failed to load theme"
+msgstr "فشل تحميل السمة"
+
+#: src/osd_frame.cpp:192
+msgid "Theme applied"
+msgstr "تم تطبيق السمة"
+
+#: src/osd_frame.cpp:198
+msgid "No minor-themes found (set MINOR_THEMES_DIR)"
+msgstr "لم يُعثر على minor-themes (اضبط MINOR_THEMES_DIR)"
+
+#: src/osd_frame.cpp:232
+msgid "— Light —"
+msgstr "— فاتح —"
+
+#: src/osd_frame.cpp:239
+msgid "— Dark —"
+msgstr "— داكن —"
+
+#: src/osd_frame.cpp:246
+msgid "Minor"
+msgstr "Minor"
+
+#: src/osd_frame.cpp:247
+msgid "Vibe"
+msgstr "Vibe"
+
+#: src/osd_frame.cpp:248
+msgid "Country"
+msgstr "بلد"
+
+#: src/osd_frame.cpp:276
+msgid "Opacity %"
+msgstr "الشفافية %"
+
+#: src/osd_frame.cpp:277
+msgid "Width"
+msgstr "العرض"
+
+#: src/osd_frame.cpp:278
+msgid "Height"
+msgstr "الارتفاع"
+
+#: src/osd_frame.cpp:280
+msgid "Margin left"
+msgstr "الهامش الأيسر"
+
+#: src/osd_frame.cpp:281
+msgid "Margin right"
+msgstr "الهامش الأيمن"
+
+#: src/osd_frame.cpp:282
+msgid "Margin top"
+msgstr "الهامش العلوي"
+
+#: src/osd_frame.cpp:283
+msgid "Margin bottom"
+msgstr "الهامش السفلي"
+
+#: src/osd_frame.cpp:439
+#, c-format
+msgid "Found %zu display(s)…"
+msgstr "تم العثور على %zu شاشة…"
+
+#: src/osd_frame.cpp:449
+msgid "No DDC-capable displays found"
+msgstr "لم يُعثر على شاشات تدعم DDC"
+
+#: src/osd_frame.cpp:497
+msgid "Ready"
+msgstr "جاهز"
+
+#: src/osd_frame.cpp:550
+msgid "Reading controls…"
+msgstr "جارٍ قراءة عناصر التحكم…"
+
+#: src/osd_frame.cpp:572 src/osd_frame.cpp:696
+msgid "Cannot open display"
+msgstr "تعذّر فتح الشاشة"
+
+#: src/osd_frame.cpp:619
+msgid "No display"
+msgstr "لا توجد شاشة"
+
+#: src/osd_frame.cpp:686
+msgid "App OSD updated"
+msgstr "تم تحديث OSD التطبيق"
+
+#: src/osd_frame.cpp:771
+msgid "Nothing to undo"
+msgstr "لا يوجد ما يمكن التراجع عنه"
+
+#: src/osd_frame.cpp:783
+msgid "Already at default"
+msgstr "بالفعل عند القيمة الافتراضية"
+
+#: src/osd_frame.cpp:787
+msgid "Reset to default"
+msgstr "تمت إعادة التعيين إلى الافتراضي"
+
+#: src/osd_frame.cpp:835
+msgid "Preset failed"
+msgstr "فشل الإعداد المسبق"
+
+#: src/osd_frame.cpp:841
+msgid "Factory reset - refreshed all"
+msgstr "إعادة ضبط المصنع — تم تحديث الكل"
+
+#: src/osd_frame.cpp:844
+msgid "Preset applied - refreshed related"
+msgstr "طُبّق الإعداد المسبق — تم تحديث العناصر ذات الصلة"
+
+#: src/osd_frame.cpp:936
+msgid "loading"
+msgstr "جارٍ التحميل"
+
+#: src/osd_frame.cpp:958
+msgid "Refresh"
+msgstr "تحديث"
+
+#: src/osd_frame.cpp:959
+msgid "Theme"
+msgstr "السمة"
+
+#: src/vcp.cpp:17
+msgid "sRGB"
+msgstr "sRGB"
+
+#: src/vcp.cpp:17
+msgid "Native"
+msgstr "أصلي"
+
+#: src/vcp.cpp:17 src/vcp.cpp:28
+msgid "5000 K"
+msgstr "5000 K"
+
+#: src/vcp.cpp:17 src/vcp.cpp:28
+msgid "6500 K"
+msgstr "6500 K"
+
+#: src/vcp.cpp:18 src/vcp.cpp:29
+msgid "7500 K"
+msgstr "7500 K"
+
+#: src/vcp.cpp:18 src/vcp.cpp:29
+msgid "9300 K"
+msgstr "9300 K"
+
+#: src/vcp.cpp:18
+msgid "User"
+msgstr "مستخدم"
+
+#: src/vcp.cpp:18
+msgid "User 1"
+msgstr "مستخدم 1"
+
+#: src/vcp.cpp:28
+msgid "6000 K"
+msgstr "6000 K"
+
+#: src/vcp.cpp:29
+msgid "8500 K"
+msgstr "8500 K"
+
+#: src/vcp.cpp:32
+msgid "VGA-1"
+msgstr "VGA-1"
+
+#: src/vcp.cpp:32
+msgid "DVI-1"
+msgstr "DVI-1"
+
+#: src/vcp.cpp:32
+msgid "DVI-2"
+msgstr "DVI-2"
+
+#: src/vcp.cpp:32
+msgid "DisplayPort-1"
+msgstr "DisplayPort-1"
+
+#: src/vcp.cpp:33
+msgid "DisplayPort-2"
+msgstr "DisplayPort-2"
+
+#: src/vcp.cpp:33
+msgid "HDMI-1"
+msgstr "HDMI-1"
+
+#: src/vcp.cpp:33
+msgid "HDMI-2"
+msgstr "HDMI-2"
+
+#: src/vcp.cpp:36
+msgid "Chinese (trad.)"
+msgstr "الصينية (تقليدية)"
+
+#: src/vcp.cpp:36
+msgid "English"
+msgstr "الإنجليزية"
+
+#: src/vcp.cpp:36
+msgid "French"
+msgstr "الفرنسية"
+
+#: src/vcp.cpp:36
+msgid "German"
+msgstr "الألمانية"
+
+#: src/vcp.cpp:37
+msgid "Japanese"
+msgstr "اليابانية"
+
+#: src/vcp.cpp:37
+msgid "Spanish"
+msgstr "الإسبانية"
+
+#: src/vcp.cpp:37
+msgid "Chinese (simp.)"
+msgstr "الصينية (مبسطة)"
+
+#: src/vcp.cpp:40
+msgid "On"
+msgstr "تشغيل"
+
+#: src/vcp.cpp:40
+msgid "Off"
+msgstr "إيقاف"
+
+#: src/vcp.cpp:40
+msgid "Power off"
+msgstr "إيقاف التشغيل"
+
+#: src/vcp.cpp:42
+msgid "Muted"
+msgstr "مكتوم"
+
+#: src/vcp.cpp:42
+msgid "Unmuted"
+msgstr "غير مكتوم"
+
+#: src/vcp.cpp:49 src/vcp.cpp:101
+msgid "Brightness"
+msgstr "السطوع"
+
+#: src/vcp.cpp:50
+msgid "Contrast"
+msgstr "التباين"
+
+#: src/vcp.cpp:51
+msgid "Backlight"
+msgstr "الإضاءة الخلفية"
+
+#: src/vcp.cpp:52
+msgid "Backlight white"
+msgstr "إضاءة خلفية بيضاء"
+
+#: src/vcp.cpp:54
+msgid "Sharpness"
+msgstr "الحدة"
+
+#: src/vcp.cpp:55
+msgid "Display scaling"
+msgstr "تحجيم العرض"
+
+#: src/vcp.cpp:56
+msgid "Scan mode"
+msgstr "وضع المسح"
+
+#: src/vcp.cpp:57
+msgid "Display application"
+msgstr "تطبيق العرض"
+
+#: src/vcp.cpp:58
+msgid "Sub-pixel layout"
+msgstr "تخطيط البكسل الفرعي"
+
+#: src/vcp.cpp:59
+msgid "Technology type"
+msgstr "نوع التقنية"
+
+#: src/vcp.cpp:61
+msgid "Color preset"
+msgstr "إعداد اللون المسبق"
+
+#: src/vcp.cpp:63
+msgid "Color temp mode"
+msgstr "وضع حرارة اللون"
+
+#: src/vcp.cpp:65
+msgid "Color temp. step"
+msgstr "خطوة حرارة اللون"
+
+#: src/vcp.cpp:66
+msgid "Gain red"
+msgstr "الكسب الأحمر"
+
+#: src/vcp.cpp:67
+msgid "Gain green"
+msgstr "الكسب الأخضر"
+
+#: src/vcp.cpp:68
+msgid "Gain blue"
+msgstr "الكسب الأزرق"
+
+#: src/vcp.cpp:69
+msgid "Black level red"
+msgstr "مستوى الأسود الأحمر"
+
+#: src/vcp.cpp:70
+msgid "Black level green"
+msgstr "مستوى الأسود الأخضر"
+
+#: src/vcp.cpp:71
+msgid "Black level blue"
+msgstr "مستوى الأسود الأزرق"
+
+#: src/vcp.cpp:73
+msgid "Speaker volume"
+msgstr "مستوى صوت السماعات"
+
+#: src/vcp.cpp:74
+msgid "Audio mute"
+msgstr "كتم الصوت"
+
+#: src/vcp.cpp:76
+msgid "Treble"
+msgstr "الطبقة العالية"
+
+#: src/vcp.cpp:77
+msgid "Bass"
+msgstr "الطبقة المنخفضة"
+
+#: src/vcp.cpp:78
+msgid "Balance"
+msgstr "التوازن"
+
+#: src/vcp.cpp:80
+msgid "OSD control"
+msgstr "التحكم في OSD"
+
+#: src/vcp.cpp:81
+msgid "OSD language"
+msgstr "لغة OSD"
+
+#: src/vcp.cpp:84
+msgid "Factory defaults"
+msgstr "إعدادات المصنع"
+
+#: src/vcp.cpp:85
+msgid "Factory brightness/contrast"
+msgstr "سطوع/تباين المصنع"
+
+#: src/vcp.cpp:86
+msgid "Factory geometry"
+msgstr "هندسة المصنع"
+
+#: src/vcp.cpp:87
+msgid "Factory color"
+msgstr "ألوان المصنع"
+
+#: src/vcp.cpp:89
+msgid "Input source"
+msgstr "مصدر الإدخال"
+
+#: src/vcp.cpp:91
+msgid "Power mode"
+msgstr "وضع الطاقة"
+
+#: src/vcp.cpp:93
+msgid "Horizontal frequency"
+msgstr "التردد الأفقي"
+
+#: src/vcp.cpp:94
+msgid "Vertical frequency"
+msgstr "التردد الرأسي"
+
+#: src/vcp.cpp:95
+msgid "VCP version"
+msgstr "إصدار VCP"
+
+#: src/vcp.cpp:103
+msgid "Image"
+msgstr "الصورة"
+
+#: src/vcp.cpp:105
+msgid "Color"
+msgstr "اللون"
+
+#: src/vcp.cpp:107
+msgid "Audio"
+msgstr "الصوت"
+
+#: src/vcp.cpp:109
+msgid "OSD"
+msgstr "OSD"
+
+#: src/vcp.cpp:111
+msgid "Presets"
+msgstr "الإعدادات المسبقة"
+
+#: src/vcp.cpp:113
+msgid "Misc"
+msgstr "متفرقات"
+
+#: src/vcp.cpp:115
+msgid "App OSD"
+msgstr "OSD التطبيق"
+
+#: src/vcp.cpp:117
+msgid "Unknown"
+msgstr "غير معروف"
+

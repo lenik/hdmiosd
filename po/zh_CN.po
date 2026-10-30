@@ -1,0 +1,518 @@
+# Translations for hdmiosd.
+# Copyright (C) 2026 Lenik
+# This file is distributed under the same license as the hdmiosd package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: hdmiosd 0.2.0\n"
+"Report-Msgid-Bugs-To: hdmiosd@bodz.net\n"
+"PO-Revision-Date: 2026-10-30 15:30+0800\n"
+"Last-Translator: Lenik <hdmiosd@bodz.net>\n"
+"Language-Team: Chinese (simplified)\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/hdmiosd.cpp:31
+msgid ""
+"Usage: hdmiosd [OPTION]...\n"
+"Control HDMI/DP monitor settings via DDC/CI (Device OSD) and App OSD.\n"
+"\n"
+msgstr ""
+"用法: hdmiosd [选项]...\n"
+"通过 DDC/CI 控制 HDMI/DP 显示器（设备 OSD）与应用 OSD。\n"
+"\n"
+
+#: src/hdmiosd.cpp:35
+msgid "/dev/i2c-*, /dev/video*, PCI/USB id, or /sys/... path\n"
+msgstr ""
+"/dev/i2c-*、/dev/video*、PCI/USB 标识或 /sys/... 路径\n"
+
+#: src/hdmiosd.cpp:37
+msgid "window opacity 0-100 (overrides settings.ini)\n"
+msgstr ""
+"窗口不透明度 0–100（覆盖 settings.ini）\n"
+
+#: src/hdmiosd.cpp:39
+msgid "window size\n"
+msgstr ""
+"窗口大小\n"
+
+#: src/hdmiosd.cpp:41
+msgid "place from left edge\n"
+msgstr ""
+"距左边缘的位置\n"
+
+#: src/hdmiosd.cpp:43
+msgid "place from right edge\n"
+msgstr ""
+"距右边缘的位置\n"
+
+#: src/hdmiosd.cpp:45
+msgid "place from top edge\n"
+msgstr ""
+"距上边缘的位置\n"
+
+#: src/hdmiosd.cpp:47
+msgid "place from bottom edge\n"
+msgstr ""
+"距下边缘的位置\n"
+
+#: src/hdmiosd.cpp:49
+msgid "list DDC-capable displays and exit\n"
+msgstr ""
+"列出支持 DDC 的显示器后退出\n"
+
+#: src/hdmiosd.cpp:51
+msgid "more logging\n"
+msgstr ""
+"更详细日志\n"
+
+#: src/hdmiosd.cpp:53
+msgid "less logging\n"
+msgstr ""
+"更少日志\n"
+
+#: src/hdmiosd.cpp:55
+msgid "help\n"
+msgstr ""
+"帮助\n"
+
+#: src/hdmiosd.cpp:57
+msgid ""
+"version\n"
+"\n"
+msgstr ""
+"版本\n"
+"\n"
+
+#: src/hdmiosd.cpp:58
+#, c-format
+msgid "Settings: %s\n"
+msgstr ""
+"设置: %s\n"
+
+#: src/hdmiosd.cpp:59
+#, c-format
+msgid "Report bugs to: <%s>\n"
+msgstr ""
+"缺陷报告: <%s>\n"
+
+#: src/osd_frame.cpp:89 src/osd_frame.cpp:633
+msgid "Scanning displays…"
+msgstr "正在扫描显示器…"
+
+#: src/osd_frame.cpp:181
+msgid "Failed to load theme"
+msgstr "主题加载失败"
+
+#: src/osd_frame.cpp:192
+msgid "Theme applied"
+msgstr "主题已应用"
+
+#: src/osd_frame.cpp:198
+msgid "No minor-themes found (set MINOR_THEMES_DIR)"
+msgstr "未找到 minor-themes（请设置 MINOR_THEMES_DIR）"
+
+#: src/osd_frame.cpp:232
+msgid "— Light —"
+msgstr "— 浅色 —"
+
+#: src/osd_frame.cpp:239
+msgid "— Dark —"
+msgstr "— 深色 —"
+
+#: src/osd_frame.cpp:246
+msgid "Minor"
+msgstr "Minor"
+
+#: src/osd_frame.cpp:247
+msgid "Vibe"
+msgstr "Vibe"
+
+#: src/osd_frame.cpp:248
+msgid "Country"
+msgstr "国家"
+
+#: src/osd_frame.cpp:276
+msgid "Opacity %"
+msgstr "不透明度 %"
+
+#: src/osd_frame.cpp:277
+msgid "Width"
+msgstr "宽度"
+
+#: src/osd_frame.cpp:278
+msgid "Height"
+msgstr "高度"
+
+#: src/osd_frame.cpp:280
+msgid "Margin left"
+msgstr "左边距"
+
+#: src/osd_frame.cpp:281
+msgid "Margin right"
+msgstr "右边距"
+
+#: src/osd_frame.cpp:282
+msgid "Margin top"
+msgstr "上边距"
+
+#: src/osd_frame.cpp:283
+msgid "Margin bottom"
+msgstr "下边距"
+
+#: src/osd_frame.cpp:439
+#, c-format
+msgid "Found %zu display(s)…"
+msgstr "已找到 %zu 台显示器…"
+
+#: src/osd_frame.cpp:449
+msgid "No DDC-capable displays found"
+msgstr "未找到支持 DDC 的显示器"
+
+#: src/osd_frame.cpp:497
+msgid "Ready"
+msgstr "就绪"
+
+#: src/osd_frame.cpp:550
+msgid "Reading controls…"
+msgstr "正在读取控制项…"
+
+#: src/osd_frame.cpp:572 src/osd_frame.cpp:696
+msgid "Cannot open display"
+msgstr "无法打开显示器"
+
+#: src/osd_frame.cpp:619
+msgid "No display"
+msgstr "无显示器"
+
+#: src/osd_frame.cpp:686
+msgid "App OSD updated"
+msgstr "应用 OSD 已更新"
+
+#: src/osd_frame.cpp:771
+msgid "Nothing to undo"
+msgstr "没有可撤销的操作"
+
+#: src/osd_frame.cpp:783
+msgid "Already at default"
+msgstr "已是默认值"
+
+#: src/osd_frame.cpp:787
+msgid "Reset to default"
+msgstr "已恢复默认"
+
+#: src/osd_frame.cpp:835
+msgid "Preset failed"
+msgstr "预设失败"
+
+#: src/osd_frame.cpp:841
+msgid "Factory reset - refreshed all"
+msgstr "出厂复位 — 已刷新全部"
+
+#: src/osd_frame.cpp:844
+msgid "Preset applied - refreshed related"
+msgstr "预设已应用 — 已刷新相关项"
+
+#: src/osd_frame.cpp:936
+msgid "loading"
+msgstr "加载中"
+
+#: src/osd_frame.cpp:958
+msgid "Refresh"
+msgstr "刷新"
+
+#: src/osd_frame.cpp:959
+msgid "Theme"
+msgstr "主题"
+
+#: src/vcp.cpp:17
+msgid "sRGB"
+msgstr "sRGB"
+
+#: src/vcp.cpp:17
+msgid "Native"
+msgstr "原生"
+
+#: src/vcp.cpp:17 src/vcp.cpp:28
+msgid "5000 K"
+msgstr "5000 K"
+
+#: src/vcp.cpp:17 src/vcp.cpp:28
+msgid "6500 K"
+msgstr "6500 K"
+
+#: src/vcp.cpp:18 src/vcp.cpp:29
+msgid "7500 K"
+msgstr "7500 K"
+
+#: src/vcp.cpp:18 src/vcp.cpp:29
+msgid "9300 K"
+msgstr "9300 K"
+
+#: src/vcp.cpp:18
+msgid "User"
+msgstr "用户"
+
+#: src/vcp.cpp:18
+msgid "User 1"
+msgstr "用户 1"
+
+#: src/vcp.cpp:28
+msgid "6000 K"
+msgstr "6000 K"
+
+#: src/vcp.cpp:29
+msgid "8500 K"
+msgstr "8500 K"
+
+#: src/vcp.cpp:32
+msgid "VGA-1"
+msgstr "VGA-1"
+
+#: src/vcp.cpp:32
+msgid "DVI-1"
+msgstr "DVI-1"
+
+#: src/vcp.cpp:32
+msgid "DVI-2"
+msgstr "DVI-2"
+
+#: src/vcp.cpp:32
+msgid "DisplayPort-1"
+msgstr "DisplayPort-1"
+
+#: src/vcp.cpp:33
+msgid "DisplayPort-2"
+msgstr "DisplayPort-2"
+
+#: src/vcp.cpp:33
+msgid "HDMI-1"
+msgstr "HDMI-1"
+
+#: src/vcp.cpp:33
+msgid "HDMI-2"
+msgstr "HDMI-2"
+
+#: src/vcp.cpp:36
+msgid "Chinese (trad.)"
+msgstr "繁体中文"
+
+#: src/vcp.cpp:36
+msgid "English"
+msgstr "英语"
+
+#: src/vcp.cpp:36
+msgid "French"
+msgstr "法语"
+
+#: src/vcp.cpp:36
+msgid "German"
+msgstr "德语"
+
+#: src/vcp.cpp:37
+msgid "Japanese"
+msgstr "日语"
+
+#: src/vcp.cpp:37
+msgid "Spanish"
+msgstr "西班牙语"
+
+#: src/vcp.cpp:37
+msgid "Chinese (simp.)"
+msgstr "简体中文"
+
+#: src/vcp.cpp:40
+msgid "On"
+msgstr "开"
+
+#: src/vcp.cpp:40
+msgid "Off"
+msgstr "关"
+
+#: src/vcp.cpp:40
+msgid "Power off"
+msgstr "关机"
+
+#: src/vcp.cpp:42
+msgid "Muted"
+msgstr "已静音"
+
+#: src/vcp.cpp:42
+msgid "Unmuted"
+msgstr "未静音"
+
+#: src/vcp.cpp:49 src/vcp.cpp:101
+msgid "Brightness"
+msgstr "亮度"
+
+#: src/vcp.cpp:50
+msgid "Contrast"
+msgstr "对比度"
+
+#: src/vcp.cpp:51
+msgid "Backlight"
+msgstr "背光"
+
+#: src/vcp.cpp:52
+msgid "Backlight white"
+msgstr "白背光"
+
+#: src/vcp.cpp:54
+msgid "Sharpness"
+msgstr "锐度"
+
+#: src/vcp.cpp:55
+msgid "Display scaling"
+msgstr "显示缩放"
+
+#: src/vcp.cpp:56
+msgid "Scan mode"
+msgstr "扫描模式"
+
+#: src/vcp.cpp:57
+msgid "Display application"
+msgstr "显示应用"
+
+#: src/vcp.cpp:58
+msgid "Sub-pixel layout"
+msgstr "亚像素布局"
+
+#: src/vcp.cpp:59
+msgid "Technology type"
+msgstr "技术类型"
+
+#: src/vcp.cpp:61
+msgid "Color preset"
+msgstr "色彩预设"
+
+#: src/vcp.cpp:63
+msgid "Color temp mode"
+msgstr "色温模式"
+
+#: src/vcp.cpp:65
+msgid "Color temp. step"
+msgstr "色温步进"
+
+#: src/vcp.cpp:66
+msgid "Gain red"
+msgstr "增益 红"
+
+#: src/vcp.cpp:67
+msgid "Gain green"
+msgstr "增益 绿"
+
+#: src/vcp.cpp:68
+msgid "Gain blue"
+msgstr "增益 蓝"
+
+#: src/vcp.cpp:69
+msgid "Black level red"
+msgstr "黑电平 红"
+
+#: src/vcp.cpp:70
+msgid "Black level green"
+msgstr "黑电平 绿"
+
+#: src/vcp.cpp:71
+msgid "Black level blue"
+msgstr "黑电平 蓝"
+
+#: src/vcp.cpp:73
+msgid "Speaker volume"
+msgstr "扬声器音量"
+
+#: src/vcp.cpp:74
+msgid "Audio mute"
+msgstr "音频静音"
+
+#: src/vcp.cpp:76
+msgid "Treble"
+msgstr "高音"
+
+#: src/vcp.cpp:77
+msgid "Bass"
+msgstr "低音"
+
+#: src/vcp.cpp:78
+msgid "Balance"
+msgstr "平衡"
+
+#: src/vcp.cpp:80
+msgid "OSD control"
+msgstr "OSD 控制"
+
+#: src/vcp.cpp:81
+msgid "OSD language"
+msgstr "OSD 语言"
+
+#: src/vcp.cpp:84
+msgid "Factory defaults"
+msgstr "出厂默认"
+
+#: src/vcp.cpp:85
+msgid "Factory brightness/contrast"
+msgstr "出厂亮度/对比度"
+
+#: src/vcp.cpp:86
+msgid "Factory geometry"
+msgstr "出厂几何"
+
+#: src/vcp.cpp:87
+msgid "Factory color"
+msgstr "出厂色彩"
+
+#: src/vcp.cpp:89
+msgid "Input source"
+msgstr "输入源"
+
+#: src/vcp.cpp:91
+msgid "Power mode"
+msgstr "电源模式"
+
+#: src/vcp.cpp:93
+msgid "Horizontal frequency"
+msgstr "水平频率"
+
+#: src/vcp.cpp:94
+msgid "Vertical frequency"
+msgstr "垂直频率"
+
+#: src/vcp.cpp:95
+msgid "VCP version"
+msgstr "VCP 版本"
+
+#: src/vcp.cpp:103
+msgid "Image"
+msgstr "图像"
+
+#: src/vcp.cpp:105
+msgid "Color"
+msgstr "色彩"
+
+#: src/vcp.cpp:107
+msgid "Audio"
+msgstr "音频"
+
+#: src/vcp.cpp:109
+msgid "OSD"
+msgstr "OSD"
+
+#: src/vcp.cpp:111
+msgid "Presets"
+msgstr "预设"
+
+#: src/vcp.cpp:113
+msgid "Misc"
+msgstr "杂项"
+
+#: src/vcp.cpp:115
+msgid "App OSD"
+msgstr "应用 OSD"
+
+#: src/vcp.cpp:117
+msgid "Unknown"
+msgstr "未知"
+

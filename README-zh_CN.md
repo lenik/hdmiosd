@@ -1,32 +1,38 @@
-本文件由模板生成。
-除项目名称和程序名称外，其余内容均为占位符。
-请根据当前项目的具体情况重写此文档。
-
 # hdmiosd
 
-`hdmiosd` 是一个简单的基于 Meson 的 **C 命令行** 模板（不含共享/静态库打包）。  
-`hdmiosd` 是示例应用；可在 `meson.build` 的 `app_sources` 中继续添加应用。
+Linux 下用于 HDMI/DisplayPort 显示器的 DDC/CI 屏上控制器（C++ / wxWidgets）。
 
-## 仓库结构
+`hdmiosd` 通过 `/dev/i2c-*` 直接收发 DDC/CI（不调用 `ddcutil`），并以画布绘制
+扁平 OSD；Tabler 图标经 bas-cpp assets 嵌入。
 
-- `src/` - 应用源码（`hdmiosd.c`）与小型辅助模块（`commons.c`）
-- `tests/` - 最小化单元测试（不依赖 Check）
-- `debian/` - Debian 打包元数据
-- `docs/` - AsciiDoc man 页源文件
-- `meson.build` - 顶层构建定义
+## Device OSD 与 App OSD
 
-## 示例应用：`hdmiosd`
+| 菜单 | 作用 |
+|------|------|
+| **OSD**（以及亮度/图像/色彩等） | 控制**显示器**（VCP） |
+| **App OSD** | 控制 **hdmiosd 窗口**：不透明度、尺寸、边距定位 |
 
-```bash
-hdmiosd [OPTION]... [FILE]...
+App OSD 与上次显示器、快捷键保存在：
+
+```text
+~/.config/hdmiosd/settings.ini
 ```
 
-类似 `cat`：将文件拼接输出到 stdout。支持 `-v`/`--verbose`、`-q`/`--quiet`、`-h`/`--help`、`--version`。
+## 用法
+
+```bash
+hdmiosd [选项]
+hdmiosd --list
+hdmiosd -d /dev/i2c-15 -o 90 -r 24 -b 48
+```
+
+访问 I2C 通常需要加入 `i2c` 组（或以 root 运行）。
 
 ## 构建
 
 ```bash
-sudo apt install meson ninja-build gcc pkg-config asciidoctor
+sudo apt install meson ninja-build g++ pkg-config libbas-cpp-dev libbas-ui-dev \
+  libwxgtk3.2-dev asciidoctor zip binutils
 meson setup /build
 ninja -C /build
 meson test -C /build

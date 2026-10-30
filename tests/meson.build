@@ -1,11 +1,13 @@
 test_exe = executable(
-    'commons_test',
+    'vcp_test',
     [
-        'commons_test.c',
-        '../src/commons.c',
+        'vcp_test.cpp',
+        '../src/vcp.cpp',
     ],
     include_directories: include_directories('../src'),
+    cpp_args: ['-DTEXT_DOMAIN=hdmiosd'],
+    dependencies: [bas_cpp_dep],
     install: false,
 )
 
-test('commons', test_exe)
+test('vcp', test_exe)
