@@ -1,3 +1,25 @@
+hdmiosd (0.2.2) unstable; urgency=medium
+
+  * Hide the pointer while dragging margin sliders.
+  * Flush sidebar against the content pane (no inter-pane gap); keep
+    padding inside each pane.
+  * F11/F12 cycle previous/next theme with a desktop notification.
+  * Pin the pointer to the margin slider thumb on grab and while
+    adjusting; disable margin handlers while dragging the OSD window.
+  * Margins are relative to the current monitor client area (not the
+    virtual desktop); window drag updates nearest-edge margins live
+    and highlights the last-updated control.
+  * Margin sliders grab at the current value (no jump-off-slider on
+    first click); drag the OSD from any blank area.
+  * Prefer DejaVu/FreeSans bold for an OSD-like face instead of UI Sans.
+  * Map theme roles to distinct palette classes and enforce contrast so
+    labels stay readable on accent fills.
+  * Semantic typography roles (title/button/label/value/enum/menu);
+    richer VS Code style-class mapping; sized Theme button; colored
+    theme picker popup.
+
+ -- Lenik (谢继雷) <lenik@bodz.net>  Fri, 30 Oct 2026 16:53:18 +0800
+
 hdmiosd (0.2.1) unstable; urgency=medium
 
   * Embed hdmiosd.png in assets.zip; set I2C timeouts so probe cannot

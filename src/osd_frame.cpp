@@ -12,21 +12,27 @@
 #include <bas/locale/i18n.h>
 #include <bas/log/uselog.h>
 
+#include <wx/cursor.h>
+#include <wx/dc.h>
 #include <wx/dcbuffer.h>
 #include <wx/display.h>
-#include <wx/menu.h>
+#include <wx/notifmsg.h>
+#include <wx/popupwin.h>
 #include <wx/sizer.h>
+#include <wx/uiaction.h>
 
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
 #include <unistd.h>
 
 namespace {
-constexpr int SIDEBAR_W = 160;
+constexpr int SIDEBAR_W = 168;
 constexpr int ROW_H = 36;
 constexpr int TOP_H = 48;
 constexpr int BTN_W = 28;
-constexpr int PAD = 10;
+constexpr int PAD = 10;       /* outer inset from window edge */
+constexpr int INNER_PAD = 10; /* padding inside sidebar / content panes */
 constexpr int ARROW_W = 22;
 
 enum AppCtrlId {
@@ -59,6 +65,124 @@ int text_vcenter_y(wxDC& dc, int row_y, int row_h) {
     dc.GetTextExtent("Ag", &tw, &th);
     return row_y + (row_h - th) / 2;
 }
+
+enum class ThemeRowKind { Header, Item, Sep };
+
+struct ThemeRow {
+    ThemeRowKind kind = ThemeRowKind::Item;
+    wxString label;
+    std::string path;
+    int y = 0;
+    int h = 0;
+};
+
+class ThemePickerPopup : public wxPopupTransientWindow {
+  public:
+    ThemePickerPopup(OsdFrame* owner, std::vector<ThemeRow> rows, const OsdPalette& pal)
+        : wxPopupTransientWindow(owner, wxBORDER_NONE), owner_(owner), rows_(std::move(rows)),
+          pal_(pal) {
+        SetBackgroundStyle(wxBG_STYLE_PAINT);
+        Bind(wxEVT_PAINT, &ThemePickerPopup::on_paint, this);
+        Bind(wxEVT_LEFT_DOWN, &ThemePickerPopup::on_left, this);
+        Bind(wxEVT_MOTION, &ThemePickerPopup::on_motion, this);
+        Bind(wxEVT_LEAVE_WINDOW, [this](wxMouseEvent&) {
+            hover_ = -1;
+            Refresh(false);
+        });
+        layout();
+    }
+
+    void layout() {
+        wxMemoryDC probe;
+        probe.SetFont(osd_typeface(OsdTypeRole::Menu));
+        int max_w = 160;
+        int y = 6;
+        for (auto& r : rows_) {
+            if (r.kind == ThemeRowKind::Sep) {
+                r.y = y;
+                r.h = 7;
+                y += r.h;
+                continue;
+            }
+            wxFont f = r.kind == ThemeRowKind::Header ? osd_typeface(OsdTypeRole::MenuHeader)
+                                                      : osd_typeface(OsdTypeRole::Menu);
+            probe.SetFont(f);
+            wxCoord tw = 0, th = 0;
+            probe.GetTextExtent(r.label, &tw, &th);
+            max_w = std::max(max_w, (int)tw + 28);
+            r.h = r.kind == ThemeRowKind::Header ? 22 : 26;
+            r.y = y;
+            y += r.h;
+        }
+        SetClientSize(max_w, y + 6);
+    }
+
+  private:
+    OsdFrame* owner_;
+    std::vector<ThemeRow> rows_;
+    OsdPalette pal_;
+    int hover_ = -1;
+
+    int hit(int y) const {
+        for (int i = 0; i < (int)rows_.size(); i++) {
+            if (rows_[i].kind != ThemeRowKind::Item) {
+                continue;
+            }
+            if (y >= rows_[i].y && y < rows_[i].y + rows_[i].h) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    void on_paint(wxPaintEvent&) {
+        wxAutoBufferedPaintDC dc(this);
+        wxSize sz = GetClientSize();
+        dc.SetBackground(wxBrush(pal_.menu_bg));
+        dc.Clear();
+        draw_round_rect(dc, 0, 0, sz.x, sz.y, 4, pal_.menu_bg, &pal_.border);
+        for (int i = 0; i < (int)rows_.size(); i++) {
+            const auto& r = rows_[i];
+            if (r.kind == ThemeRowKind::Sep) {
+                dc.SetPen(wxPen(pal_.menu_sep, 1));
+                int yy = r.y + r.h / 2;
+                dc.DrawLine(10, yy, sz.x - 10, yy);
+                continue;
+            }
+            bool sel = (i == hover_);
+            if (sel && r.kind == ThemeRowKind::Item) {
+                draw_round_rect(dc, 4, r.y, sz.x - 8, r.h, 3, pal_.menu_sel_bg);
+            }
+            if (r.kind == ThemeRowKind::Header) {
+                dc.SetFont(osd_typeface(OsdTypeRole::MenuHeader));
+                dc.SetTextForeground(pal_.menu_header_fg);
+            } else {
+                dc.SetFont(osd_typeface(OsdTypeRole::Menu));
+                dc.SetTextForeground(sel ? pal_.menu_sel_fg : pal_.menu_fg);
+            }
+            dc.DrawText(r.label, 12, text_vcenter_y(dc, r.y, r.h));
+        }
+    }
+
+    void on_motion(wxMouseEvent& ev) {
+        int h = hit(ev.GetY());
+        if (h != hover_) {
+            hover_ = h;
+            Refresh(false);
+        }
+    }
+
+    void on_left(wxMouseEvent& ev) {
+        int h = hit(ev.GetY());
+        if (h >= 0 && !rows_[h].path.empty()) {
+            std::string path = rows_[h].path;
+            Dismiss();
+            owner_->apply_theme(path);
+            return;
+        }
+        Dismiss();
+    }
+};
 } // namespace
 
 wxBEGIN_EVENT_TABLE(OsdFrame, wxFrame)
@@ -182,39 +306,37 @@ void OsdFrame::set_cat_index(int i) {
     }
 }
 
-void OsdFrame::apply_window_placement() {
-    auto& a = settings_->app;
-    int cw = a.width > 0 ? a.width : 640;
-    int ch = a.height > 0 ? a.height : 480;
-    /* Set size before and after Show — wxGTK often ignores pre-map SetClientSize
-       on borderless frames (ends up as a 1×1 invisible window). */
-    SetMinClientSize(wxSize(320, 240));
-    SetClientSize(cw, ch);
-    SetSize(GetSize());
-    Layout();
-
-    /* Prefer the display under the mouse (same screen the user is on). */
-    wxPoint mouse = wxGetMousePosition();
-    int disp_idx = wxDisplay::GetFromPoint(mouse);
+wxRect OsdFrame::monitor_client_at(wxPoint pt) const {
+    int disp_idx = wxDisplay::GetFromPoint(pt);
     if (disp_idx == wxNOT_FOUND) {
-        disp_idx = wxDisplay::GetFromWindow(this);
+        disp_idx = wxDisplay::GetFromWindow(const_cast<OsdFrame*>(this));
     }
     if (disp_idx == wxNOT_FOUND) {
         disp_idx = 0;
     }
     wxDisplay disp((unsigned)disp_idx);
     wxRect geo = disp.GetClientArea();
-    if (geo.width <= 0) {
+    if (geo.width <= 0 || geo.height <= 0) {
         geo = disp.GetGeometry();
     }
-    int w = cw, h = ch;
-    GetSize(&w, &h);
+    return geo;
+}
+
+wxPoint OsdFrame::placement_origin() const {
+    auto& a = settings_->app;
+    int cw = a.width > 0 ? a.width : 640;
+    int ch = a.height > 0 ? a.height : 480;
+    int w = 0, h = 0;
+    OsdFrame* self = const_cast<OsdFrame*>(this);
+    self->GetSize(&w, &h);
     if (w < 320 || h < 240) {
-        /* Last resort if the WM still collapsed us. */
         w = cw;
         h = ch;
-        SetSize(w, h);
     }
+
+    /* Always the monitor under the pointer — never the virtual-desktop union. */
+    wxPoint mouse = wxGetMousePosition();
+    wxRect geo = monitor_client_at(mouse);
     int x = geo.x + (geo.width - w) / 2;
     int y = geo.y + (geo.height - h) / 2;
     if (a.have_left) {
@@ -227,7 +349,6 @@ void OsdFrame::apply_window_placement() {
     } else if (a.have_bottom) {
         y = geo.y + geo.height - h - a.margin_bottom;
     }
-    /* Clamp into the chosen display so margins cannot push us off-screen. */
     if (x < geo.x) {
         x = geo.x;
     }
@@ -240,16 +361,151 @@ void OsdFrame::apply_window_placement() {
     if (y + h > geo.y + geo.height) {
         y = geo.y + std::max(0, geo.height - h);
     }
+    return wxPoint(x, y);
+}
+
+void OsdFrame::apply_window_placement() {
+    auto& a = settings_->app;
+    int cw = a.width > 0 ? a.width : 640;
+    int ch = a.height > 0 ? a.height : 480;
+    /* Set size before and after Show — wxGTK often ignores pre-map SetClientSize
+       on borderless frames (ends up as a 1×1 invisible window). */
+    SetMinClientSize(wxSize(320, 240));
+    SetClientSize(cw, ch);
+    SetSize(GetSize());
+    Layout();
+
+    wxPoint mouse = wxGetMousePosition();
+    wxRect geo = monitor_client_at(mouse);
+    int disp_idx = wxDisplay::GetFromPoint(mouse);
+    if (disp_idx == wxNOT_FOUND) {
+        disp_idx = wxDisplay::GetFromWindow(this);
+    }
+    if (disp_idx == wxNOT_FOUND) {
+        disp_idx = 0;
+    }
+    int w = cw, h = ch;
+    GetSize(&w, &h);
+    if (w < 320 || h < 240) {
+        w = cw;
+        h = ch;
+        SetSize(w, h);
+    }
+    wxPoint origin = placement_origin();
+    int x = origin.x, y = origin.y;
     SetSize(x, y, w, h);
+    last_place_origin_ = origin;
     loginfo_fmt("OSD placement: display=%d mouse=(%d,%d) geo=%dx%d+%d+%d "
                 "window=%dx%d+%d+%d opacity=%.2f shown=%d",
                 disp_idx, mouse.x, mouse.y, geo.width, geo.height, geo.x, geo.y, w, h, x, y,
                 a.opacity, IsShown() ? 1 : 0);
 }
 
+int OsdFrame::find_app_item(int app_id) const {
+    for (int i = 0; i < (int)items_.size(); i++) {
+        if (items_[(size_t)i].app_id == app_id) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void OsdFrame::sync_margins_from_position(wxPoint frame_pos, bool save) {
+    if (!settings_) {
+        return;
+    }
+    int w = 0, h = 0;
+    GetSize(&w, &h);
+    if (w < 1 || h < 1) {
+        return;
+    }
+    /* Current monitor under the pointer — never the virtual-desktop union. */
+    wxRect geo = monitor_client_at(wxGetMousePosition());
+
+    int left = std::max(0, frame_pos.x - geo.x);
+    int right = std::max(0, (geo.x + geo.width) - (frame_pos.x + w));
+    int top = std::max(0, frame_pos.y - geo.y);
+    int bottom = std::max(0, (geo.y + geo.height) - (frame_pos.y + h));
+
+    auto& a = settings_->app;
+    constexpr int kMaxMargin = 400;
+    auto set_item = [&](int app_id, int value) {
+        int idx = find_app_item(app_id);
+        if (idx >= 0) {
+            items_[(size_t)idx].current = (uint16_t)std::clamp(value, 0, kMaxMargin);
+        }
+    };
+
+    int prev_h = a.have_left ? APP_LEFT : (a.have_right ? APP_RIGHT : -1);
+    int prev_v = a.have_top ? APP_TOP : (a.have_bottom ? APP_BOTTOM : -1);
+    int prev_h_val = a.have_left ? a.margin_left : (a.have_right ? a.margin_right : 0);
+    int prev_v_val = a.have_top ? a.margin_top : (a.have_bottom ? a.margin_bottom : 0);
+
+    int h_app;
+    int h_val;
+    if (left <= right) {
+        h_app = APP_LEFT;
+        h_val = std::clamp(left, 0, kMaxMargin);
+        a.margin_left = h_val;
+        a.have_left = true;
+        a.have_right = false;
+    } else {
+        h_app = APP_RIGHT;
+        h_val = std::clamp(right, 0, kMaxMargin);
+        a.margin_right = h_val;
+        a.have_right = true;
+        a.have_left = false;
+    }
+    set_item(h_app, h_val);
+
+    int v_app;
+    int v_val;
+    if (top <= bottom) {
+        v_app = APP_TOP;
+        v_val = std::clamp(top, 0, kMaxMargin);
+        a.margin_top = v_val;
+        a.have_top = true;
+        a.have_bottom = false;
+    } else {
+        v_app = APP_BOTTOM;
+        v_val = std::clamp(bottom, 0, kMaxMargin);
+        a.margin_bottom = v_val;
+        a.have_bottom = true;
+        a.have_top = false;
+    }
+    set_item(v_app, v_val);
+
+    int h_delta = (h_app != prev_h ? 1000 : 0) + std::abs(h_val - prev_h_val);
+    int v_delta = (v_app != prev_v ? 1000 : 0) + std::abs(v_val - prev_v_val);
+    int highlight = -1;
+    if (h_delta > 0 || v_delta > 0) {
+        highlight = (v_delta >= h_delta) ? v_app : h_app;
+    }
+    if (highlight >= 0) {
+        for (int i = 0; i < (int)visible_cats_.size(); i++) {
+            if (visible_cats_[(size_t)i] == (int)VcpCategory::AppOsd) {
+                cat_index_ = i;
+                break;
+            }
+        }
+        int idx = find_app_item(highlight);
+        if (idx >= 0) {
+            active_item_ = idx;
+        }
+    }
+
+    if (save) {
+        settings_->save();
+    }
+    if (canvas_) {
+        canvas_->Refresh(false);
+    }
+}
+
 void OsdFrame::apply_theme(const std::string& path) {
     OsdPalette pal;
-    if (!theme_load(path, pal)) {
+    std::string name;
+    if (!theme_load(path, pal, &name)) {
         set_status(_("Failed to load theme"));
         return;
     }
@@ -261,7 +517,38 @@ void OsdFrame::apply_theme(const std::string& path) {
     if (canvas_) {
         canvas_->Refresh(false);
     }
-    set_status(_("Theme applied"));
+    if (!name.empty()) {
+        char buf[256];
+        snprintf(buf, sizeof(buf), "%s: %s", _("Theme"), name.c_str());
+        set_status(buf);
+    } else {
+        set_status(_("Theme applied"));
+    }
+}
+
+void OsdFrame::cycle_theme(int dir) {
+    auto themes = theme_scan();
+    if (themes.empty()) {
+        set_status(_("No minor-themes found (set MINOR_THEMES_DIR)"));
+        return;
+    }
+    const int n = (int)themes.size();
+    int cur = 0;
+    if (settings_ && !settings_->app.theme.empty()) {
+        for (int i = 0; i < n; i++) {
+            if (themes[(size_t)i].path == settings_->app.theme) {
+                cur = i;
+                break;
+            }
+        }
+    }
+    int next = (cur + dir + n * 64) % n;
+    const ThemeEntry& t = themes[(size_t)next];
+    apply_theme(t.path);
+    wxString title = wxString::FromUTF8(_("Theme"));
+    wxString body = wxString::FromUTF8(t.name.empty() ? t.path.c_str() : t.name.c_str());
+    wxNotificationMessage note(title, body, this);
+    note.Show(3);
 }
 
 void OsdFrame::popup_theme_menu() {
@@ -270,59 +557,55 @@ void OsdFrame::popup_theme_menu() {
         set_status(_("No minor-themes found (set MINOR_THEMES_DIR)"));
         return;
     }
-    wxMenu menu;
-    wxMenu* sub_minor = new wxMenu;
-    wxMenu* sub_vibe = new wxMenu;
-    wxMenu* sub_country = new wxMenu;
-    int id_base = 8000;
-    std::vector<std::string> id_paths;
-    auto add_group = [&](wxMenu* sub, const std::string& group) {
-        bool any_light = false, any_dark = false;
+    std::vector<ThemeRow> rows;
+    auto push_group = [&](const char* title, const std::string& group) {
+        bool any = false;
         for (const auto& t : themes) {
-            if (t.group == group && t.type == "light") {
-                any_light = true;
-            }
-            if (t.group == group && t.type == "dark") {
-                any_dark = true;
+            if (t.group == group) {
+                any = true;
+                break;
             }
         }
-        auto add_hdr = [&](const char* label) {
-            wxMenuItem* hdr = sub->Append(wxID_ANY, label);
-            hdr->Enable(false);
-        };
-        auto add_type = [&](const char* type) {
+        if (!any) {
+            return;
+        }
+        if (!rows.empty()) {
+            rows.push_back({ThemeRowKind::Sep, {}, {}});
+        }
+        rows.push_back({ThemeRowKind::Header, wxString::FromUTF8(title), {}});
+        auto push_type = [&](const char* type_label, const char* type) {
+            bool have = false;
+            for (const auto& t : themes) {
+                if (t.group == group && t.type == type) {
+                    have = true;
+                    break;
+                }
+            }
+            if (!have) {
+                return;
+            }
+            rows.push_back({ThemeRowKind::Header, wxString::FromUTF8(type_label), {}});
             for (const auto& t : themes) {
                 if (t.group != group || t.type != type) {
                     continue;
                 }
-                int id = id_base + (int)id_paths.size();
-                id_paths.push_back(t.path);
-                sub->Append(id, t.name);
+                rows.push_back({ThemeRowKind::Item, wxString::FromUTF8(t.name.c_str()), t.path});
             }
         };
-        if (any_light) {
-            add_hdr(_("— Light —"));
-            add_type("light");
-        }
-        if (any_light && any_dark) {
-            sub->AppendSeparator();
-        }
-        if (any_dark) {
-            add_hdr(_("— Dark —"));
-            add_type("dark");
-        }
+        push_type(_("— Light —"), "light");
+        push_type(_("— Dark —"), "dark");
     };
-    add_group(sub_minor, "minor");
-    add_group(sub_vibe, "vibe");
-    add_group(sub_country, "country");
-    menu.AppendSubMenu(sub_minor, wxString::FromUTF8(_("Minor")));
-    menu.AppendSubMenu(sub_vibe, wxString::FromUTF8(_("Vibe")));
-    menu.AppendSubMenu(sub_country, wxString::FromUTF8(_("Country")));
+    push_group(_("Minor"), "minor");
+    push_group(_("Vibe"), "vibe");
+    push_group(_("Country"), "country");
 
-    int cmd = GetPopupMenuSelectionFromUser(menu);
-    if (cmd >= id_base && cmd < id_base + (int)id_paths.size()) {
-        apply_theme(id_paths[cmd - id_base]);
+    auto* pop = new ThemePickerPopup(this, std::move(rows), palette_);
+    wxPoint pt = ClientToScreen(wxPoint(0, 0));
+    if (canvas_) {
+        pt = canvas_->ClientToScreen(wxPoint(canvas_->theme_btn_x(), TOP_H));
     }
+    pop->Position(pt, wxSize(0, 0));
+    pop->Popup();
 }
 
 void OsdFrame::save_settings() {
@@ -772,9 +1055,14 @@ void OsdFrame::flush_pending() {
         it.current = pending_value_;
         settings_->save();
         set_status(_("App OSD updated"));
-        if (margin) {
-            /* Move the OSD only — never warp or synthesize pointer motion. */
+        if (margin && canvas_) {
+            /* handlers off → move → pin thumb → rebaseline → on */
+            canvas_->set_mouse_events_enabled(false);
             apply_window_placement();
+            wxPoint origin = last_place_origin_;
+            canvas_->pin_cursor_to_slider(pending_item_, pending_value_, &origin);
+            canvas_->rebaseline_margin_drag(pending_value_);
+            canvas_->set_mouse_events_enabled(true);
         }
         canvas_->Refresh(false);
         return;
@@ -1010,17 +1298,17 @@ void OsdCanvas::on_paint(wxPaintEvent&) {
     wxAutoBufferedPaintDC dc(this);
     wxSize sz = GetClientSize();
     const OsdPalette& pal = frame_->palette();
-    const wxColour icon_tint(255, 255, 255); /* always white glyphs */
+    const wxColour icon_tint = pal.icon;
 
-    dc.SetBackground(wxBrush(pal.bg));
+    dc.SetBackground(wxBrush(pal.editor_bg));
     dc.Clear();
 
-    draw_round_rect(dc, 1, 1, sz.x - 2, sz.y - 2, 6, pal.bg, &pal.border);
+    draw_round_rect(dc, 1, 1, sz.x - 2, sz.y - 2, 6, pal.editor_bg, &pal.border);
 
-    /* top bar (drag handle for borderless window) */
-    draw_round_rect(dc, 2, 2, sz.x - 4, TOP_H, 0, pal.panel);
-    dc.SetTextForeground(pal.text);
-    dc.SetFont(wxFont(11, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+    /* titleBar */
+    draw_round_rect(dc, 2, 2, sz.x - 4, TOP_H, 0, pal.panel_bg);
+    dc.SetTextForeground(pal.title_fg);
+    dc.SetFont(osd_typeface(OsdTypeRole::Title));
     wxString title = tr("No display");
     if (frame_->list() && frame_->list()->size()) {
         title = wxString::FromUTF8(frame_->list()->at(frame_->current_display()).label());
@@ -1032,59 +1320,69 @@ void OsdCanvas::on_paint(wxPaintEvent&) {
     int title_ty = text_vcenter_y(dc, 2, TOP_H);
     dc.DrawText(title, PAD, title_ty);
 
-    auto draw_top_btn = [&](int x, int w, const char* msgid, const char* icon) {
-        draw_round_rect(dc, x, 10, w, 28, 4, pal.accent, &pal.border);
-        wxBitmap bmp = load_tabler_icon(icon, 16, icon_tint);
+    auto measure_top_btn = [&](const wxString& label) {
+        dc.SetFont(osd_typeface(OsdTypeRole::Button));
+        wxCoord tw = 0, th = 0;
+        dc.GetTextExtent(label, &tw, &th);
+        return std::max(72, (int)tw + 36); /* icon + padding */
+    };
+    auto draw_top_btn = [&](int x, int w, const wxString& label, const char* icon) {
+        draw_round_rect(dc, x, 10, w, 28, 4, pal.button_bg, &pal.button_border);
+        wxBitmap bmp = load_tabler_icon(icon, 16, pal.button_fg);
         int iy = 10 + (28 - 16) / 2;
         if (bmp.IsOk()) {
             dc.DrawBitmap(bmp, x + 6, iy, true);
         }
-        dc.SetTextForeground(pal.text);
-        dc.SetFont(wxFont(9, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+        dc.SetTextForeground(pal.button_fg);
+        dc.SetFont(osd_typeface(OsdTypeRole::Button));
         int ty = text_vcenter_y(dc, 10, 28);
-        dc.DrawText(tr(msgid), x + 26, ty);
+        dc.DrawText(label, x + 26, ty);
     };
-    /* Theme (top-right), then Refresh — single refresh for displays + controls */
-    int theme_w = 78;
-    int refresh_w = 88;
-    int theme_x = sz.x - PAD - theme_w;
-    int refresh_x = theme_x - 8 - refresh_w;
-    draw_top_btn(refresh_x, refresh_w, _("Refresh"), "refresh");
-    draw_top_btn(theme_x, theme_w, _("Theme"), "palette");
+    wxString refresh_lab = tr("Refresh");
+    wxString theme_lab = tr("Theme");
+    theme_w_ = measure_top_btn(theme_lab);
+    refresh_w_ = measure_top_btn(refresh_lab);
+    theme_x_ = sz.x - PAD - theme_w_;
+    refresh_x_ = theme_x_ - 8 - refresh_w_;
+    draw_top_btn(refresh_x_, refresh_w_, refresh_lab, "refresh");
+    draw_top_btn(theme_x_, theme_w_, theme_lab, "palette");
 
-    /* sidebar */
+    /* sideBar + editor: flush (no gap between); padding is inside each pane. */
+    int side_x = PAD;
     int side_y = TOP_H + PAD;
     int side_h = sz.y - TOP_H - 2 * PAD - 22;
-    draw_round_rect(dc, PAD, side_y, SIDEBAR_W, side_h, 4, pal.side);
+    draw_round_rect(dc, side_x, side_y, SIDEBAR_W, side_h, 4, pal.sidebar_bg, &pal.border);
 
-    dc.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+    dc.SetFont(osd_typeface(OsdTypeRole::Sidebar));
     const auto& cats = frame_->visible_cats();
     for (int v = 0; v < (int)cats.size(); v++) {
         auto cat = (VcpCategory)cats[v];
-        int iy = side_y + 8 + v * 34;
+        int iy = side_y + INNER_PAD + v * 34;
         bool sel = v == frame_->cat_index();
         if (sel) {
-            draw_round_rect(dc, PAD + 4, iy, SIDEBAR_W - 8, 30, 3, pal.accent);
+            draw_round_rect(dc, side_x + INNER_PAD / 2, iy, SIDEBAR_W - INNER_PAD, 30, 3,
+                            pal.selection_bg);
         }
-        wxBitmap ic = load_tabler_icon(vcp_category_icon(cat), 16, icon_tint);
+        wxColour row_fg = sel ? pal.selection_fg : pal.sidebar_fg;
+        wxBitmap ic = load_tabler_icon(vcp_category_icon(cat), 16, row_fg);
         int ic_y = iy + (30 - 16) / 2;
         if (ic.IsOk()) {
-            dc.DrawBitmap(ic, PAD + 10, ic_y, true);
+            dc.DrawBitmap(ic, side_x + INNER_PAD, ic_y, true);
         }
-        dc.SetTextForeground(sel ? pal.active : pal.muted);
+        dc.SetTextForeground(row_fg);
         wxString lab = wxString::Format("%d  %s", v + 1, tr(vcp_category_name(cat)));
-        dc.DrawText(lab, PAD + 32, text_vcenter_y(dc, iy, 30));
+        dc.DrawText(lab, side_x + INNER_PAD + 22, text_vcenter_y(dc, iy, 30));
     }
 
-    /* content */
-    int cx = PAD + SIDEBAR_W + PAD;
+    /* editor / content pane — abut sidebar (no inter-pane margin) */
+    int cx = side_x + SIDEBAR_W;
     int cy = side_y;
     int cw = sz.x - cx - PAD;
     int ch = side_h;
-    draw_round_rect(dc, cx, cy, cw, ch, 4, pal.bg);
+    draw_round_rect(dc, cx, cy, cw, ch, 4, pal.editor_bg, &pal.border);
 
     auto cat = cats.empty() ? VcpCategory::AppOsd : (VcpCategory)cats[frame_->cat_index()];
-    int y = cy + 8;
+    int y = cy + INNER_PAD;
     auto& items = frame_->items();
 
     for (int i = 0; i < (int)items.size(); i++) {
@@ -1093,7 +1391,7 @@ void OsdCanvas::on_paint(wxPaintEvent&) {
         if (icat != cat) {
             continue;
         }
-        if (y + ROW_H > cy + ch - 4) {
+        if (y + ROW_H > cy + ch - INNER_PAD) {
             break;
         }
         it.row_y = y;
@@ -1101,7 +1399,8 @@ void OsdCanvas::on_paint(wxPaintEvent&) {
         it.undo_x0 = it.undo_x1 = it.reset_x0 = it.reset_x1 = 0;
         bool active = i == frame_->active_item();
         if (active) {
-            draw_round_rect(dc, cx + 4, y, cw - 8, ROW_H - 2, 3, pal.panel, &pal.active);
+            draw_round_rect(dc, cx + INNER_PAD / 2, y, cw - INNER_PAD, ROW_H - 2, 3, pal.panel_bg,
+                            &pal.highlight);
         }
 
         wxString name;
@@ -1125,33 +1424,37 @@ void OsdCanvas::on_paint(wxPaintEvent&) {
         int icon_y = y + (ROW_H - 16) / 2;
 
         if (it.kind == VcpKind::Button) {
-            it.btn_x0 = cx + 12;
-            it.btn_x1 = cx + cw - 12;
+            it.btn_x0 = cx + INNER_PAD;
+            it.btn_x1 = cx + cw - INNER_PAD;
             it.bar_y0 = y + 4;
             it.bar_y1 = y + ROW_H - 8;
             draw_round_rect(dc, (int)it.btn_x0, (int)it.bar_y0, (int)(it.btn_x1 - it.btn_x0),
                             (int)(it.bar_y1 - it.bar_y0), 4,
-                            active ? pal.accent : pal.bar_bg, &pal.border);
+                            active ? pal.button_bg : pal.input_bg, &pal.button_border);
             if (!icon_stem.empty()) {
-                wxBitmap ic = load_tabler_icon(icon_stem, 16, icon_tint);
+                wxBitmap ic = load_tabler_icon(icon_stem, 16,
+                                              active ? pal.button_fg : icon_tint);
                 if (ic.IsOk()) {
                     dc.DrawBitmap(ic, (int)it.btn_x0 + 10, icon_y, true);
                 }
             }
-            dc.SetTextForeground(pal.text);
+            dc.SetTextForeground(active ? pal.button_fg : pal.editor_fg);
+            dc.SetFont(osd_typeface(OsdTypeRole::Button));
             dc.DrawText(name, (int)it.btn_x0 + 34, row_ty);
             y += ROW_H;
             continue;
         }
 
         if (!icon_stem.empty()) {
-            wxBitmap ic = load_tabler_icon(icon_stem, 16, icon_tint);
+            wxBitmap ic =
+                load_tabler_icon(icon_stem, 16, active ? pal.highlight : icon_tint);
             if (ic.IsOk()) {
-                dc.DrawBitmap(ic, cx + 10, icon_y, true);
+                dc.DrawBitmap(ic, cx + INNER_PAD, icon_y, true);
             }
         }
-        dc.SetTextForeground(active ? pal.active : pal.text);
-        dc.DrawText(name, cx + 32, row_ty);
+        dc.SetTextForeground(active ? pal.highlight : pal.editor_fg);
+        dc.SetFont(osd_typeface(OsdTypeRole::Label));
+        dc.DrawText(name, cx + INNER_PAD + 22, row_ty);
 
         int label_w = 170;
         int actions = (it.kind == VcpKind::Ro) ? 0 : (2 * BTN_W + 8);
@@ -1172,13 +1475,14 @@ void OsdCanvas::on_paint(wxPaintEvent&) {
             } else {
                 vlab = wxString::Format("%u", (unsigned)it.current);
             }
+            dc.SetFont(osd_typeface(OsdTypeRole::Enum));
             wxCoord vw = 0, vh = 0;
             dc.GetTextExtent(vlab, &vw, &vh);
             int value_w = std::max(48, (int)vw + 8);
             int ctrl_w = ARROW_W + 4 + value_w + 4 + ARROW_W;
-            int ctrl_x = cx + cw - 12 - actions - ctrl_w;
-            if (ctrl_x < cx + 12 + label_w) {
-                ctrl_x = cx + 12 + label_w;
+            int ctrl_x = cx + cw - INNER_PAD - actions - ctrl_w;
+            if (ctrl_x < cx + INNER_PAD + label_w) {
+                ctrl_x = cx + INNER_PAD + label_w;
             }
             it.left_x0 = ctrl_x;
             it.left_x1 = ctrl_x + ARROW_W;
@@ -1189,19 +1493,20 @@ void OsdCanvas::on_paint(wxPaintEvent&) {
 
             bool can_prev = it.choice_idx > 0;
             bool can_next = it.choice_idx >= 0 && it.choice_idx + 1 < (int)it.choices.size();
-            dc.SetFont(wxFont(11, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-            dc.SetTextForeground(can_prev ? pal.text : pal.muted);
+            /* dropdown chip behind enum value */
+            draw_round_rect(dc, (int)it.bar_x0 - 2, (int)it.bar_y0 - 2,
+                            (int)(it.bar_x1 - it.bar_x0) + 4, 20, 3, pal.dropdown_bg,
+                            &pal.input_border);
+            dc.SetFont(osd_typeface(OsdTypeRole::Enum));
+            dc.SetTextForeground(can_prev ? pal.editor_fg : pal.muted_fg);
             dc.DrawText("<", (int)it.left_x0 + 4, row_ty);
-            dc.SetTextForeground(pal.text);
-            dc.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+            dc.SetTextForeground(pal.dropdown_fg);
             dc.DrawText(vlab, (int)it.bar_x0 + 4, row_ty);
-            dc.SetFont(wxFont(11, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-            dc.SetTextForeground(can_next ? pal.text : pal.muted);
+            dc.SetTextForeground(can_next ? pal.editor_fg : pal.muted_fg);
             dc.DrawText(">", (int)it.right_x0 + 4, row_ty);
-            dc.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
         } else {
-            it.bar_x0 = cx + 12 + label_w;
-            it.bar_x1 = cx + cw - 12 - actions - 64;
+            it.bar_x0 = cx + INNER_PAD + label_w;
+            it.bar_x1 = cx + cw - INNER_PAD - actions - 64;
             if (it.bar_x1 < it.bar_x0 + 40) {
                 it.bar_x1 = it.bar_x0 + 40;
             }
@@ -1209,20 +1514,21 @@ void OsdCanvas::on_paint(wxPaintEvent&) {
             double frac = maxv > 0 ? it.current / maxv : 0;
             frac = std::clamp(frac, 0.0, 1.0);
             draw_round_rect(dc, (int)it.bar_x0, (int)it.bar_y0, (int)(it.bar_x1 - it.bar_x0), 16, 3,
-                            pal.bar_bg);
+                            pal.bar_track, &pal.input_border);
             draw_round_rect(dc, (int)it.bar_x0, (int)it.bar_y0,
                             (int)((it.bar_x1 - it.bar_x0) * frac), 16, 3,
-                            active ? pal.active : pal.bar);
+                            active ? pal.highlight : pal.bar_fill);
 
             char vbuf[40];
             snprintf(vbuf, sizeof(vbuf), "%u", (unsigned)it.current);
-            dc.SetTextForeground(pal.text);
+            dc.SetTextForeground(pal.input_fg);
+            dc.SetFont(osd_typeface(OsdTypeRole::Value));
             dc.DrawText(vbuf, (int)it.bar_x1 + 8, row_ty);
         }
 
         if (it.kind != VcpKind::Ro) {
-            double ux = cx + cw - 12 - 2 * BTN_W - 4;
-            double rx = cx + cw - 12 - BTN_W;
+            double ux = cx + cw - INNER_PAD - 2 * BTN_W - 4;
+            double rx = cx + cw - INNER_PAD - BTN_W;
             it.undo_x0 = ux;
             it.undo_x1 = ux + BTN_W;
             it.reset_x0 = rx;
@@ -1239,23 +1545,19 @@ void OsdCanvas::on_paint(wxPaintEvent&) {
         y += ROW_H;
     }
 
-    /* status */
-    dc.SetTextForeground(pal.muted);
-    dc.SetFont(wxFont(8, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+    /* statusBar */
+    draw_round_rect(dc, 2, sz.y - 22, sz.x - 4, 20, 0, pal.status_bg);
+    dc.SetTextForeground(pal.status_fg);
+    dc.SetFont(osd_typeface(OsdTypeRole::Status));
     dc.DrawText(frame_->status(), PAD, sz.y - 18);
 }
 
 int OsdCanvas::hit_top_btn(int x, int y) const {
-    wxSize sz = GetClientSize();
-    int theme_w = 78;
-    int refresh_w = 88;
-    int theme_x = sz.x - PAD - theme_w;
-    int refresh_x = theme_x - 8 - refresh_w;
     if (y >= 10 && y <= 38) {
-        if (x >= refresh_x && x <= refresh_x + refresh_w) {
+        if (refresh_w_ > 0 && x >= refresh_x_ && x <= refresh_x_ + refresh_w_) {
             return 0; /* refresh */
         }
-        if (x >= theme_x && x <= theme_x + theme_w) {
+        if (theme_w_ > 0 && x >= theme_x_ && x <= theme_x_ + theme_w_) {
             return 1; /* theme */
         }
     }
@@ -1263,12 +1565,13 @@ int OsdCanvas::hit_top_btn(int x, int y) const {
 }
 
 int OsdCanvas::hit_sidebar(int x, int y) const {
+    int side_x = PAD;
     int side_y = TOP_H + PAD;
-    if (x < PAD || x > PAD + SIDEBAR_W) {
+    if (x < side_x || x >= side_x + SIDEBAR_W) {
         return -1;
     }
     for (int v = 0; v < (int)frame_->visible_cats().size(); v++) {
-        int iy = side_y + 8 + v * 34;
+        int iy = side_y + INNER_PAD + v * 34;
         if (y >= iy && y <= iy + 30) {
             return v;
         }
@@ -1318,7 +1621,68 @@ int OsdCanvas::hit_item(int x, int y, int* zone) const {
     return -1;
 }
 
+void OsdCanvas::begin_win_drag(const wxMouseEvent& ev) {
+    win_drag_ = true;
+    if (margin_drag_) {
+        SetCursor(wxNullCursor);
+    }
+    margin_drag_ = false;
+    margin_app_id_ = -1;
+    margin_handlers_enabled_ = false; /* no margin slider / pin while moving OSD */
+    win_drag_origin_ = frame_->GetPosition();
+    win_drag_start_ = ev.GetPosition();
+    ClientToScreen(&win_drag_start_.x, &win_drag_start_.y);
+    frame_->sync_margins_from_position(win_drag_origin_, false);
+    if (!HasCapture()) {
+        CaptureMouse();
+    }
+}
+
+bool OsdCanvas::slider_thumb_client(int item_idx, uint16_t value, wxPoint* out) const {
+    if (!out || item_idx < 0 || item_idx >= (int)frame_->items().size()) {
+        return false;
+    }
+    const OsdItem& it = frame_->items()[item_idx];
+    if (it.bar_x1 <= it.bar_x0) {
+        return false;
+    }
+    double maxv = it.max ? it.max : 100;
+    double frac = maxv > 0 ? (double)value / maxv : 0.0;
+    frac = std::clamp(frac, 0.0, 1.0);
+    out->x = (int)std::lround(it.bar_x0 + frac * (it.bar_x1 - it.bar_x0));
+    out->y = (int)std::lround((it.bar_y0 + it.bar_y1) / 2.0);
+    return true;
+}
+
+void OsdCanvas::pin_cursor_to_slider(int item_idx, uint16_t value, const wxPoint* frame_origin) {
+    wxPoint thumb;
+    if (!slider_thumb_client(item_idx, value, &thumb)) {
+        return;
+    }
+    /* Absolute screen from intended frame origin — X11 Move is async, so
+       WarpPointer(client) against a stale window spot lands off the bar. */
+    wxPoint origin = frame_origin ? *frame_origin : frame_->GetPosition();
+    wxPoint screen = origin + frame_->GetClientAreaOrigin() + GetPosition() + thumb;
+    wxUIActionSimulator sim;
+    if (!sim.MouseMove(screen)) {
+        /* Fallback: client warp relative to wherever the frame reports now. */
+        wxPoint local = screen - (frame_->GetPosition() + frame_->GetClientAreaOrigin() + GetPosition());
+        WarpPointer(local.x, local.y);
+    }
+}
+
+void OsdCanvas::rebaseline_margin_drag(uint16_t value) {
+    if (!margin_drag_) {
+        return;
+    }
+    margin_drag_screen0_ = wxGetMousePosition();
+    margin_drag_value0_ = value;
+}
+
 void OsdCanvas::on_left_down(wxMouseEvent& ev) {
+    if (!mouse_events_enabled_) {
+        return;
+    }
     int top = hit_top_btn(ev.GetX(), ev.GetY());
     if (top == 0) {
         frame_->refresh_all();
@@ -1329,12 +1693,8 @@ void OsdCanvas::on_left_down(wxMouseEvent& ev) {
         return;
     }
     if (ev.GetY() < TOP_H) {
-        /* Borderless: drag window from the title/top bar */
-        win_drag_ = true;
-        win_drag_origin_ = frame_->GetPosition();
-        win_drag_start_ = ev.GetPosition();
-        ClientToScreen(&win_drag_start_.x, &win_drag_start_.y);
-        CaptureMouse();
+        /* Title bar blank (outside Refresh/Theme) → drag window. */
+        begin_win_drag(ev);
         return;
     }
     int side = hit_sidebar(ev.GetX(), ev.GetY());
@@ -1345,6 +1705,8 @@ void OsdCanvas::on_left_down(wxMouseEvent& ev) {
     int zone = 0;
     int idx = hit_item(ev.GetX(), ev.GetY(), &zone);
     if (idx < 0) {
+        /* Any blank area (padding, empty content) moves the OSD. */
+        begin_win_drag(ev);
         return;
     }
     frame_->set_active_item(idx);
@@ -1370,45 +1732,86 @@ void OsdCanvas::on_left_down(wxMouseEvent& ev) {
         return;
     }
     if (it.kind == VcpKind::Continuous && ev.GetX() >= it.bar_x0 && ev.GetX() <= it.bar_x1) {
-        double frac = (ev.GetX() - it.bar_x0) / (it.bar_x1 - it.bar_x0);
         uint16_t maxv = it.max ? it.max : 100;
+        if (is_margin_app(it.app_id)) {
+            if (!margin_handlers_enabled_) {
+                begin_win_drag(ev);
+                return;
+            }
+            /* Grab at current value; hide pointer and pin onto the thumb. */
+            margin_drag_ = true;
+            it.hist.push(it.current);
+            drag_item_ = idx;
+            drag_hist_pushed_ = true;
+            margin_app_id_ = it.app_id;
+            margin_drag_bar_w_ = std::max(1, (int)(it.bar_x1 - it.bar_x0));
+            margin_drag_max_ = maxv;
+            margin_drag_value0_ = it.current;
+            SetCursor(wxCursor(wxCURSOR_BLANK));
+            if (!HasCapture()) {
+                CaptureMouse();
+            }
+            set_mouse_events_enabled(false);
+            pin_cursor_to_slider(idx, it.current);
+            rebaseline_margin_drag(it.current);
+            set_mouse_events_enabled(true);
+            return;
+        }
+        margin_drag_ = false;
+        double frac = (ev.GetX() - it.bar_x0) / (it.bar_x1 - it.bar_x0);
         uint16_t v = (uint16_t)std::lround(frac * maxv);
         it.hist.push(it.current);
         drag_item_ = idx;
         drag_hist_pushed_ = true;
-        margin_drag_ = is_margin_app(it.app_id);
-        if (margin_drag_) {
-            margin_drag_screen0_ = wxGetMousePosition();
-            margin_drag_value0_ = v;
-            margin_drag_bar_w_ = std::max(1, (int)(it.bar_x1 - it.bar_x0));
-            margin_drag_max_ = maxv;
-        }
         if (!HasCapture()) {
             CaptureMouse();
         }
         frame_->queue_set_item(idx, v, true, false);
         return;
     }
-    Refresh(false);
+    /* Row label / non-control chrome → drag window. */
+    begin_win_drag(ev);
 }
 
 void OsdCanvas::on_left_up(wxMouseEvent&) {
+    if (!mouse_events_enabled_) {
+        return;
+    }
     if (win_drag_) {
         win_drag_ = false;
+        frame_->sync_margins_from_position(frame_->GetPosition(), true);
+        margin_handlers_enabled_ = true;
+    }
+    if (margin_drag_) {
+        SetCursor(wxNullCursor);
     }
     drag_item_ = -1;
     drag_hist_pushed_ = false;
     margin_drag_ = false;
+    margin_app_id_ = -1;
     if (HasCapture()) {
         ReleaseMouse();
     }
 }
 
 void OsdCanvas::on_motion(wxMouseEvent& ev) {
+    if (!mouse_events_enabled_) {
+        return;
+    }
     if (win_drag_ && ev.Dragging() && ev.LeftIsDown()) {
         wxPoint cur = ev.GetPosition();
         ClientToScreen(&cur.x, &cur.y);
-        frame_->Move(win_drag_origin_ + (cur - win_drag_start_));
+        wxPoint pos = win_drag_origin_ + (cur - win_drag_start_);
+        int w = 0, h = 0;
+        frame_->GetSize(&w, &h);
+        /* Keep the OSD inside the monitor under the pointer (not virtual desktop). */
+        wxRect geo = frame_->monitor_client_at(wxGetMousePosition());
+        if (w > 0 && h > 0 && geo.width > 0 && geo.height > 0) {
+            pos.x = std::clamp(pos.x, geo.x, geo.x + std::max(0, geo.width - w));
+            pos.y = std::clamp(pos.y, geo.y, geo.y + std::max(0, geo.height - h));
+        }
+        frame_->Move(pos);
+        frame_->sync_margins_from_position(pos, false);
         return;
     }
     if (drag_item_ < 0 || !ev.LeftIsDown()) {
@@ -1420,10 +1823,14 @@ void OsdCanvas::on_motion(wxMouseEvent& ev) {
     }
     uint16_t v;
     if (margin_drag_) {
-        /* Screen Δx only — window Move must not change the sampled value. */
-        int dx = wxGetMousePosition().x - margin_drag_screen0_.x;
+        if (!margin_handlers_enabled_) {
+            return;
+        }
+        /* Screen Δx; window Move + thumb pin naturally invert right-edge feel. */
+        int delta = wxGetMousePosition().x - margin_drag_screen0_.x;
         int iv = (int)margin_drag_value0_ +
-                 (int)std::lround((double)dx * (double)margin_drag_max_ / (double)margin_drag_bar_w_);
+                 (int)std::lround((double)delta * (double)margin_drag_max_ /
+                                  (double)margin_drag_bar_w_);
         if (iv < 0) {
             iv = 0;
         }
@@ -1441,6 +1848,9 @@ void OsdCanvas::on_motion(wxMouseEvent& ev) {
 }
 
 void OsdCanvas::on_mousewheel(wxMouseEvent& ev) {
+    if (!mouse_events_enabled_) {
+        return;
+    }
     int zone = 0;
     int idx = hit_item(ev.GetX(), ev.GetY(), &zone);
     if (idx >= 0) {
@@ -1457,6 +1867,14 @@ void OsdCanvas::on_char_hook(wxKeyEvent& ev) {
     }
     if (key == WXK_F5) {
         frame_->refresh_all();
+        return;
+    }
+    if (key == WXK_F11) {
+        frame_->cycle_theme(-1);
+        return;
+    }
+    if (key == WXK_F12) {
+        frame_->cycle_theme(1);
         return;
     }
     if (key == WXK_TAB) {

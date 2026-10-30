@@ -63,8 +63,15 @@ class OsdFrame : public wxFrame {
     void refresh_displays();
     void refresh_all(); /* rediscover displays + re-read controls */
     void apply_window_placement();
+    /* Target frame top-left for current App OSD margins (same math as placement). */
+    wxPoint placement_origin() const;
+    /* Client area of the monitor containing pt (not the virtual desktop). */
+    wxRect monitor_client_at(wxPoint pt) const;
+    /* Derive L/R/T/B margins from frame top-left on the current monitor; highlight. */
+    void sync_margins_from_position(wxPoint frame_pos, bool save);
     void save_settings();
     void apply_theme(const std::string& path);
+    void cycle_theme(int dir); /* -1 prev, +1 next; notifies on change */
     const OsdPalette& palette() const { return palette_; }
     void popup_theme_menu();
 
@@ -79,6 +86,7 @@ class OsdFrame : public wxFrame {
     void set_cat_index(int i);
     int active_item() const { return active_item_; }
     void set_active_item(int i) { active_item_ = i; }
+    int find_app_item(int app_id) const;
     uint16_t color_temp_step() const { return color_temp_step_; }
     const std::string& status() const { return status_; }
     void set_status(const std::string& s);
@@ -111,6 +119,7 @@ class OsdFrame : public wxFrame {
     int pending_item_ = -1;
     uint16_t pending_value_ = 0;
     OsdPalette palette_;
+    wxPoint last_place_origin_{0, 0};
 
     std::shared_ptr<std::atomic<bool>> alive_;
     std::atomic<uint64_t> load_gen_{0};
@@ -137,6 +146,13 @@ class OsdFrame : public wxFrame {
 class OsdCanvas : public wxPanel {
   public:
     explicit OsdCanvas(OsdFrame* frame);
+    int theme_btn_x() const { return theme_x_; }
+
+    void set_mouse_events_enabled(bool on) { mouse_events_enabled_ = on; }
+    bool mouse_events_enabled() const { return mouse_events_enabled_; }
+    /* Pin pointer to continuous-bar thumb; uses placement origin when frame moved. */
+    void pin_cursor_to_slider(int item_idx, uint16_t value, const wxPoint* frame_origin = nullptr);
+    void rebaseline_margin_drag(uint16_t value);
 
   private:
     OsdFrame* frame_;
@@ -145,9 +161,13 @@ class OsdCanvas : public wxPanel {
     bool win_drag_ = false;
     wxPoint win_drag_origin_;
     wxPoint win_drag_start_;
-    /* Margin: sample with screen Δx so window Move cannot feed back into value.
-       Never warp / synthesize pointer motion. */
+    /* Margin: screen Δx so window Move cannot feed back into value.
+       Pin cursor to thumb after each apply; ignore warp-driven motion.
+       Disabled while the OSD itself is being dragged. */
     bool margin_drag_ = false;
+    bool margin_handlers_enabled_ = true;
+    bool mouse_events_enabled_ = true;
+    int margin_app_id_ = -1;
     wxPoint margin_drag_screen0_;
     uint16_t margin_drag_value0_ = 0;
     int margin_drag_bar_w_ = 1;
@@ -160,10 +180,15 @@ class OsdCanvas : public wxPanel {
     void on_mousewheel(wxMouseEvent&);
     void on_key_down(wxKeyEvent&);
     void on_char_hook(wxKeyEvent&);
+    void begin_win_drag(const wxMouseEvent& ev);
+    bool slider_thumb_client(int item_idx, uint16_t value, wxPoint* out) const;
 
     int hit_sidebar(int x, int y) const;
     int hit_item(int x, int y, int* zone) const;
     int hit_top_btn(int x, int y) const; /* 0=refresh 1=theme */
+
+    /* Layout caches filled during paint for hit-testing. */
+    int refresh_x_ = 0, refresh_w_ = 0, theme_x_ = 0, theme_w_ = 0;
 
     wxDECLARE_EVENT_TABLE();
 };
