@@ -19,7 +19,20 @@ MINGW_CC := $(shell command -v x86_64-w64-mingw32-gcc 2>/dev/null)
 all:
 	"$(HOST_SH)" run $(KIND) -- $(MAKE) -C "$(CURDIR)" local
 
-local: $(ARTIFACT)
+# Soft-skip when cross bas-cpp is missing so zfr publish does not fail hard
+# (zfr only checks for mingw-gcc; wx/bas for mingw are often absent on Linux).
+local:
+	@set -e; \
+	pc=$$(command -v x86_64-w64-mingw32-pkg-config 2>/dev/null \
+		|| command -v i686-w64-mingw32-pkg-config 2>/dev/null || true); \
+	if [ -z "$$OS" ] || [ "$$OS" != Windows_NT ]; then \
+		if [ -z "$$pc" ] || ! "$$pc" --exists bas-cpp bas-ui 2>/dev/null; then \
+			echo "mingw: skip (cross bas-cpp/bas-ui unavailable)" >&2; \
+			mkdir -p "$(OUTDIR)"; \
+			exit 0; \
+		fi; \
+	fi; \
+	$(MAKE) "$(ARTIFACT)"
 
 stage:
 	rm -rf "$(STAGE)" "$(BUILD)"

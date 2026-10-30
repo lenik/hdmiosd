@@ -10,6 +10,7 @@ hdmiosd (0.2.1) unstable; urgency=medium
   * Fix 1×1 invisible window: SetTransparent/size only after Show;
     defer DDC scan until the shell UI has mapped.
   * Margin drag uses screen Δx only; never WarpPointer / UIActionSimulator.
+  * Skip local MinGW packaging when mingw bas-cpp/bas-ui are unavailable.
 
  -- Lenik (谢继雷) <lenik@bodz.net>  Fri, 30 Oct 2026 15:47:21 +0800
 

@@ -194,8 +194,20 @@ can_local() {
                 command -v meson >/dev/null 2>&1 || command -v gcc >/dev/null 2>&1
                 return
             fi
-            command -v x86_64-w64-mingw32-gcc >/dev/null 2>&1 \
-                || command -v i686-w64-mingw32-gcc >/dev/null 2>&1
+            # Cross gcc alone is not enough — meson needs mingw bas-cpp/bas-ui.
+            local mingw_pc=
+            if command -v x86_64-w64-mingw32-pkg-config >/dev/null 2>&1; then
+                mingw_pc=x86_64-w64-mingw32-pkg-config
+            elif command -v i686-w64-mingw32-pkg-config >/dev/null 2>&1; then
+                mingw_pc=i686-w64-mingw32-pkg-config
+            else
+                return 1
+            fi
+            if ! command -v x86_64-w64-mingw32-gcc >/dev/null 2>&1 \
+                && ! command -v i686-w64-mingw32-gcc >/dev/null 2>&1; then
+                return 1
+            fi
+            "$mingw_pc" --exists bas-cpp bas-ui 2>/dev/null
             ;;
         innosetup)
             # Native Windows uses build.cmd / build.ps1 (cmd + PowerShell).
