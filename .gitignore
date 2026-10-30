@@ -126,3 +126,6 @@ stamp-po
 stats/
 target/
 v-store
+
+**/po/*.mo
+**/po/messages.mo
