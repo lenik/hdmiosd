@@ -157,6 +157,12 @@ custom_target(
 )
 
 subdir('po')
+
+run_target(
+    'posync',
+    command: [find_program('zfr'), 'translate', '--sync'],
+)
+
 subdir('tests')
 
 run_target(

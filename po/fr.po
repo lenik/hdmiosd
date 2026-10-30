@@ -26,78 +26,65 @@ msgstr ""
 
 #: src/hdmiosd.cpp:35
 msgid "/dev/i2c-*, /dev/video*, PCI/USB id, or /sys/... path\n"
-msgstr ""
-"/dev/i2c-*, /dev/video*, id PCI/USB ou chemin /sys/...\n"
+msgstr "/dev/i2c-*, /dev/video*, id PCI/USB ou chemin /sys/...\n"
 
 #: src/hdmiosd.cpp:37
 msgid "window opacity 0-100 (overrides settings.ini)\n"
-msgstr ""
-"opacité de la fenêtre 0–100 (remplace settings.ini)\n"
+msgstr "opacité de la fenêtre 0–100 (remplace settings.ini)\n"
 
 #: src/hdmiosd.cpp:39
 msgid "window size\n"
-msgstr ""
-"taille de la fenêtre\n"
+msgstr "taille de la fenêtre\n"
 
 #: src/hdmiosd.cpp:41
 msgid "place from left edge\n"
-msgstr ""
-"placement depuis le bord gauche\n"
+msgstr "placement depuis le bord gauche\n"
 
 #: src/hdmiosd.cpp:43
 msgid "place from right edge\n"
-msgstr ""
-"placement depuis le bord droit\n"
+msgstr "placement depuis le bord droit\n"
 
 #: src/hdmiosd.cpp:45
 msgid "place from top edge\n"
-msgstr ""
-"placement depuis le bord supérieur\n"
+msgstr "placement depuis le bord supérieur\n"
 
 #: src/hdmiosd.cpp:47
 msgid "place from bottom edge\n"
-msgstr ""
-"placement depuis le bord inférieur\n"
+msgstr "placement depuis le bord inférieur\n"
 
 #: src/hdmiosd.cpp:49
 msgid "list DDC-capable displays and exit\n"
-msgstr ""
-"lister les écrans DDC et quitter\n"
+msgstr "lister les écrans DDC et quitter\n"
 
 #: src/hdmiosd.cpp:51
 msgid "more logging\n"
-msgstr ""
-"plus de journalisation\n"
+msgstr "plus de journalisation\n"
 
 #: src/hdmiosd.cpp:53
 msgid "less logging\n"
-msgstr ""
-"moins de journalisation\n"
+msgstr "moins de journalisation\n"
 
 #: src/hdmiosd.cpp:55
 msgid "help\n"
-msgstr ""
-"aide\n"
+msgstr "aide\n"
 
 #: src/hdmiosd.cpp:57
 msgid ""
 "version\n"
 "\n"
 msgstr ""
-"version\n"
+"version du programme\n"
 "\n"
 
 #: src/hdmiosd.cpp:58
 #, c-format
 msgid "Settings: %s\n"
-msgstr ""
-"Réglages : %s\n"
+msgstr "Réglages : %s\n"
 
 #: src/hdmiosd.cpp:59
 #, c-format
 msgid "Report bugs to: <%s>\n"
-msgstr ""
-"Signaler les bogues à : <%s>\n"
+msgstr "Signaler les bogues à : <%s>\n"
 
 #: src/osd_frame.cpp:89 src/osd_frame.cpp:633
 msgid "Scanning displays…"
@@ -438,7 +425,7 @@ msgstr "Graves"
 
 #: src/vcp.cpp:78
 msgid "Balance"
-msgstr "Balance"
+msgstr "Balance audio"
 
 #: src/vcp.cpp:80
 msgid "OSD control"
@@ -486,7 +473,7 @@ msgstr "Version VCP"
 
 #: src/vcp.cpp:103
 msgid "Image"
-msgstr "Image"
+msgstr "Image écran"
 
 #: src/vcp.cpp:105
 msgid "Color"
@@ -494,7 +481,7 @@ msgstr "Couleur"
 
 #: src/vcp.cpp:107
 msgid "Audio"
-msgstr "Audio"
+msgstr "Son"
 
 #: src/vcp.cpp:109
 msgid "OSD"
@@ -515,4 +502,3 @@ msgstr "OSD app"
 #: src/vcp.cpp:117
 msgid "Unknown"
 msgstr "Inconnu"
-

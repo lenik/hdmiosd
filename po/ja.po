@@ -26,58 +26,47 @@ msgstr ""
 
 #: src/hdmiosd.cpp:35
 msgid "/dev/i2c-*, /dev/video*, PCI/USB id, or /sys/... path\n"
-msgstr ""
-"/dev/i2c-*、/dev/video*、PCI/USB ID、または /sys/... パス\n"
+msgstr "/dev/i2c-*、/dev/video*、PCI/USB ID、または /sys/... パス\n"
 
 #: src/hdmiosd.cpp:37
 msgid "window opacity 0-100 (overrides settings.ini)\n"
-msgstr ""
-"ウィンドウ不透明度 0–100（settings.ini を上書き）\n"
+msgstr "ウィンドウ不透明度 0–100（settings.ini を上書き）\n"
 
 #: src/hdmiosd.cpp:39
 msgid "window size\n"
-msgstr ""
-"ウィンドウサイズ\n"
+msgstr "ウィンドウサイズ\n"
 
 #: src/hdmiosd.cpp:41
 msgid "place from left edge\n"
-msgstr ""
-"左端からの位置\n"
+msgstr "左端からの位置\n"
 
 #: src/hdmiosd.cpp:43
 msgid "place from right edge\n"
-msgstr ""
-"右端からの位置\n"
+msgstr "右端からの位置\n"
 
 #: src/hdmiosd.cpp:45
 msgid "place from top edge\n"
-msgstr ""
-"上端からの位置\n"
+msgstr "上端からの位置\n"
 
 #: src/hdmiosd.cpp:47
 msgid "place from bottom edge\n"
-msgstr ""
-"下端からの位置\n"
+msgstr "下端からの位置\n"
 
 #: src/hdmiosd.cpp:49
 msgid "list DDC-capable displays and exit\n"
-msgstr ""
-"DDC 対応ディスプレイを一覧表示して終了\n"
+msgstr "DDC 対応ディスプレイを一覧表示して終了\n"
 
 #: src/hdmiosd.cpp:51
 msgid "more logging\n"
-msgstr ""
-"詳細ログ\n"
+msgstr "詳細ログ\n"
 
 #: src/hdmiosd.cpp:53
 msgid "less logging\n"
-msgstr ""
-"簡潔ログ\n"
+msgstr "簡潔ログ\n"
 
 #: src/hdmiosd.cpp:55
 msgid "help\n"
-msgstr ""
-"ヘルプ\n"
+msgstr "ヘルプ\n"
 
 #: src/hdmiosd.cpp:57
 msgid ""
@@ -90,14 +79,12 @@ msgstr ""
 #: src/hdmiosd.cpp:58
 #, c-format
 msgid "Settings: %s\n"
-msgstr ""
-"設定: %s\n"
+msgstr "設定: %s\n"
 
 #: src/hdmiosd.cpp:59
 #, c-format
 msgid "Report bugs to: <%s>\n"
-msgstr ""
-"バグ報告先: <%s>\n"
+msgstr "バグ報告先: <%s>\n"
 
 #: src/osd_frame.cpp:89 src/osd_frame.cpp:633
 msgid "Scanning displays…"
@@ -515,4 +502,3 @@ msgstr "アプリ OSD"
 #: src/vcp.cpp:117
 msgid "Unknown"
 msgstr "不明"
-

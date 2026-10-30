@@ -56,6 +56,7 @@ meson install -C build --destdir=%{buildroot}
 %{_datadir}/bash-completion/completions/hdmiosd
 %{_mandir}/man1/hdmiosd.1*
 %{_datadir}/doc/%{name}/
+%{_datadir}/locale/*/LC_MESSAGES/hdmiosd.mo
 
 %changelog
 * Thu Aug 20 2026 Lenik <hdmiosd@bodz.net>

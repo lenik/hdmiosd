@@ -26,58 +26,47 @@ msgstr ""
 
 #: src/hdmiosd.cpp:35
 msgid "/dev/i2c-*, /dev/video*, PCI/USB id, or /sys/... path\n"
-msgstr ""
-"/dev/i2c-* أو /dev/video* أو معرّف PCI/USB أو مسار /sys/...\n"
+msgstr "/dev/i2c-* أو /dev/video* أو معرّف PCI/USB أو مسار /sys/...\n"
 
 #: src/hdmiosd.cpp:37
 msgid "window opacity 0-100 (overrides settings.ini)\n"
-msgstr ""
-"شفافية النافذة 0–100 (يتجاوز settings.ini)\n"
+msgstr "شفافية النافذة 0–100 (يتجاوز settings.ini)\n"
 
 #: src/hdmiosd.cpp:39
 msgid "window size\n"
-msgstr ""
-"حجم النافذة\n"
+msgstr "حجم النافذة\n"
 
 #: src/hdmiosd.cpp:41
 msgid "place from left edge\n"
-msgstr ""
-"الموضع من الحافة اليسرى\n"
+msgstr "الموضع من الحافة اليسرى\n"
 
 #: src/hdmiosd.cpp:43
 msgid "place from right edge\n"
-msgstr ""
-"الموضع من الحافة اليمنى\n"
+msgstr "الموضع من الحافة اليمنى\n"
 
 #: src/hdmiosd.cpp:45
 msgid "place from top edge\n"
-msgstr ""
-"الموضع من الحافة العلوية\n"
+msgstr "الموضع من الحافة العلوية\n"
 
 #: src/hdmiosd.cpp:47
 msgid "place from bottom edge\n"
-msgstr ""
-"الموضع من الحافة السفلية\n"
+msgstr "الموضع من الحافة السفلية\n"
 
 #: src/hdmiosd.cpp:49
 msgid "list DDC-capable displays and exit\n"
-msgstr ""
-"سرد الشاشات التي تدعم DDC ثم الخروج\n"
+msgstr "سرد الشاشات التي تدعم DDC ثم الخروج\n"
 
 #: src/hdmiosd.cpp:51
 msgid "more logging\n"
-msgstr ""
-"المزيد من السجلات\n"
+msgstr "المزيد من السجلات\n"
 
 #: src/hdmiosd.cpp:53
 msgid "less logging\n"
-msgstr ""
-"سجلات أقل\n"
+msgstr "سجلات أقل\n"
 
 #: src/hdmiosd.cpp:55
 msgid "help\n"
-msgstr ""
-"مساعدة\n"
+msgstr "مساعدة\n"
 
 #: src/hdmiosd.cpp:57
 msgid ""
@@ -90,14 +79,12 @@ msgstr ""
 #: src/hdmiosd.cpp:58
 #, c-format
 msgid "Settings: %s\n"
-msgstr ""
-"الإعدادات: %s\n"
+msgstr "الإعدادات: %s\n"
 
 #: src/hdmiosd.cpp:59
 #, c-format
 msgid "Report bugs to: <%s>\n"
-msgstr ""
-"أبلغ عن الأخطاء إلى: <%s>\n"
+msgstr "أبلغ عن الأخطاء إلى: <%s>\n"
 
 #: src/osd_frame.cpp:89 src/osd_frame.cpp:633
 msgid "Scanning displays…"
@@ -515,4 +502,3 @@ msgstr "OSD التطبيق"
 #: src/vcp.cpp:117
 msgid "Unknown"
 msgstr "غير معروف"
-
