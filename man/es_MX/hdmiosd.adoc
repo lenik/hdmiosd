@@ -1,0 +1,77 @@
+= hdmiosd(1)
+Lenik <hdmiosd@bodz.net>
+v{project-version}, {project-year}
+:doctype: manpage
+:manmanual: Comandos de usuario
+:mansource: hdmiosd
+:man-linkstyle: blue R <>
+:nofooter:
+
+== Nombre
+
+hdmiosd - controlador OSD DDC/CI para pantallas HDMI/DP
+
+== Sinopsis
+
+*hdmiosd* [_OPTION_]...
+
+== Descripción
+
+*hdmiosd* encuentra monitores que hablan DDC/CI en buses I2C de Linux y abre
+un OSD canvas de wxWidgets.
+
+Se ofrecen dos áreas OSD:
+
+*Menús del dispositivo* (Brillo, Imagen, Color, Audio, *OSD*, Presets, Varios)::
+  Controlan el monitor vía VCP. Las categorías vacías (por ejemplo Audio sin
+  códigos soportados) permanecen ocultas. La pestaña *OSD* ajusta el OSD del
+  monitor (idioma / botones) cuando está soportado.
+
+*App OSD*::
+  Controla la ventana de hdmiosd: opacidad, tamaño y márgenes.
+  Los valores se guardan en *~/.config/hdmiosd/settings.ini* junto con el
+  último display seleccionado y los atajos de teclado.
+
+La comunicación va directamente por */dev/i2c-** (sin subproceso *ddcutil*).
+Los iconos Tabler se incrustan mediante assets zip de bas-cpp.
+
+El acceso a I2C suele requerir pertenecer al grupo *i2c* (o ser root).
+
+== Opciones
+
+*-d, --device* _DEV_::
+  Limita el descubrimiento a buses relacionados con _DEV_.
+
+*-o, --opacity* _NUM_::
+  Opacidad de la ventana de *0* a *100* (anula la configuración de esta ejecución).
+
+*-g, --geom* _W_[x_H_]::
+  Tamaño de la ventana.
+
+*-l, --left* / *-r, --right* / *-t, --top* / *-b, --bottom* _NUM_::
+  Coloca la ventana a _NUM_ píxeles del borde indicado.
+
+*-L, --list*::
+  Lista pantallas con DDC y sale.
+
+*-v, --verbose* / *-q, --quiet* / *-h, --help* / *--version*::
+  Registro, ayuda, versión.
+
+== Archivos
+
+*~/.config/hdmiosd/settings.ini*::
+  *[display]* último bus/conector;
+  *[app_osd]* opacidad, geometría, márgenes;
+  *[shortcuts]* asignaciones acción → tecla.
+
+== Autor
+
+Escrito por {project-author} <{project-email}>.
+
+== Copyright
+
+Copyright (C) {project-year}.
+Licencia AGPL-3.0-or-later.
+Consulte el archivo LICENSE en la distribución fuente para el texto completo,
+incluidos términos adicionales que indican que este proyecto se opone a la
+explotación y la hegemonía de la IA.

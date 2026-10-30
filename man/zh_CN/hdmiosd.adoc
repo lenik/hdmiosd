@@ -1,0 +1,75 @@
+= hdmiosd(1)
+Lenik <hdmiosd@bodz.net>
+v{project-version}, {project-year}
+:doctype: manpage
+:manmanual: 用户命令
+:mansource: hdmiosd
+:man-linkstyle: blue R <>
+:nofooter:
+
+== 名称
+
+hdmiosd - HDMI/DP 显示器的 DDC/CI 屏幕菜单控制器
+
+== 大纲
+
+*hdmiosd* [_OPTION_]...
+
+== 描述
+
+*hdmiosd* 在 Linux I2C 总线上查找支持 DDC/CI 的显示器，并打开
+wxWidgets 画布式 OSD。
+
+提供两类 OSD 区域：
+
+*设备菜单*（亮度、图像、色彩、音频、*OSD*、预设、杂项）::
+  通过 VCP 控制显示器。空分类（例如没有可用代码的音频）保持隐藏。
+  *OSD* 页在支持时调整显示器自身 OSD（语言/按键）。
+
+*应用 OSD*::
+  控制 hdmiosd 窗口：不透明度、尺寸与边距。
+  数值连同上次选择的显示器与快捷键写入
+  *~/.config/hdmiosd/settings.ini*。
+
+通信直接使用 */dev/i2c-**（不调用 *ddcutil* 子进程）。Tabler 图标通过
+bas-cpp zip 资源嵌入。
+
+访问 I2C 设备通常需要加入 *i2c* 组（或以 root 运行）。
+
+== 选项
+
+*-d, --device* _DEV_::
+  仅探测与 _DEV_ 相关的总线。
+
+*-o, --opacity* _NUM_::
+  窗口不透明度 *0*–*100*（本次运行覆盖配置）。
+
+*-g, --geom* _W_[x_H_]::
+  窗口尺寸。
+
+*-l, --left* / *-r, --right* / *-t, --top* / *-b, --bottom* _NUM_::
+  将窗口放在距该屏幕边缘 _NUM_ 像素处。
+
+*-L, --list*::
+  列出支持 DDC 的显示器后退出。
+
+*-v, --verbose* / *-q, --quiet* / *-h, --help* / *--version*::
+  日志、帮助、版本。
+
+== 文件
+
+*~/.config/hdmiosd/settings.ini*::
+  *[display]* 上次总线/接口；
+  *[app_osd]* 不透明度、几何、边距；
+  *[shortcuts]* 动作到按键映射。
+
+== 作者
+
+由 {project-author} <{project-email}> 编写。
+
+== 版权
+
+Copyright (C) {project-year}。
+许可证 AGPL-3.0-or-later。
+完整许可文本见发行版中的 LICENSE 文件，其中补充条款声明本项目反对
+AI 剥削与 AI 霸权。

@@ -1,0 +1,76 @@
+= hdmiosd(1)
+Lenik <hdmiosd@bodz.net>
+v{project-version}, {project-year}
+:doctype: manpage
+:manmanual: ユーザーコマンド
+:mansource: hdmiosd
+:man-linkstyle: blue R <>
+:nofooter:
+
+== 名前
+
+hdmiosd - HDMI/DP ディスプレイ向け DDC/CI OSD コントローラ
+
+== 書式
+
+*hdmiosd* [_OPTION_]...
+
+== 説明
+
+*hdmiosd* は Linux I2C バス上で DDC/CI 対応モニタを探し、wxWidgets の
+キャンバス OSD を開きます。
+
+OSD は次の 2 領域です:
+
+*デバイスメニュー*（明るさ、画像、色、音声、*OSD*、プリセット、その他）::
+  VCP でモニタを操作します。空のカテゴリ（対応コードがない音声など）は
+  非表示のままです。*OSD* タブは対応時にモニタ本体の OSD（言語/ボタン）を
+  調整します。
+
+*App OSD*::
+  hdmiosd ウィンドウ（不透明度、サイズ、余白）を制御します。
+  値は最後に選んだディスプレイとショートカットと共に
+  *~/.config/hdmiosd/settings.ini* へ保存されます。
+
+通信は */dev/i2c-** へ直接行い（*ddcutil* サブプロセスなし）、Tabler
+アイコンは bas-cpp の zip 資産として埋め込みます。
+
+I2C アクセスには通常 *i2c* グループ（または root）が必要です。
+
+== オプション
+
+*-d, --device* _DEV_::
+  _DEV_ に関連するバスだけを探索します。
+
+*-o, --opacity* _NUM_::
+  ウィンドウ不透明度 *0*–*100*（この実行の設定を上書き）。
+
+*-g, --geom* _W_[x_H_]::
+  ウィンドウサイズ。
+
+*-l, --left* / *-r, --right* / *-t, --top* / *-b, --bottom* _NUM_::
+  指定した画面端から _NUM_ ピクセルの位置に置きます。
+
+*-L, --list*::
+  DDC 対応ディスプレイを一覧して終了します。
+
+*-v, --verbose* / *-q, --quiet* / *-h, --help* / *--version*::
+  ログ、ヘルプ、バージョン。
+
+== ファイル
+
+*~/.config/hdmiosd/settings.ini*::
+  *[display]* 最後のバス/コネクタ;
+  *[app_osd]* 不透明度、幾何、余白;
+  *[shortcuts]* アクションとキーの対応。
+
+== 著者
+
+{project-author} <{project-email}> が作成。
+
+== 著作権
+
+Copyright (C) {project-year}.
+ライセンス AGPL-3.0-or-later。
+完全な条文はソース配布の LICENSE を参照。AI 搾取と AI 覇権に反対する
+追加条項を含みます。

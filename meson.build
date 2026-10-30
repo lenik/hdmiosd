@@ -122,7 +122,11 @@ sources = [
     'src/settings.cpp',
     'src/icons.cpp',
     'src/theme.cpp',
+    'src/osd_draw.cpp',
     'src/osd_frame.cpp',
+    'src/osd_canvas.cpp',
+    'src/osd_theme_ui.cpp',
+    'src/osd_placement.cpp',
     'src/hdmiosd.cpp',
 ]
 
@@ -152,24 +156,41 @@ install_data(
     install_dir: pkgdocdir,
 )
 
+man_asciidoctor_args = [
+    asciidoctor,
+    '-b', 'manpage',
+    '-a', 'project-version=' + meson.project_version(),
+    '-a', 'project-year=@0@'.format(project_year),
+    '-a', 'project-author=' + project_author,
+    '-a', 'project-email=' + project_email,
+]
+
 custom_target(
     'hdmiosd-man',
     input: 'man/hdmiosd.adoc',
     output: 'hdmiosd.1',
-    command: [
-        asciidoctor,
-        '-b', 'manpage',
-        '-a', 'project-version=' + meson.project_version(),
-        '-a', 'project-year=@0@'.format(project_year),
-        '-a', 'project-author=' + project_author,
-        '-a', 'project-email=' + project_email,
-        '-o', '@OUTPUT@',
-        '@INPUT@',
-    ],
+    command: man_asciidoctor_args + ['-o', '@OUTPUT@', '@INPUT@'],
     build_by_default: true,
     install: true,
     install_dir: mandir / 'man1',
 )
+
+man_locales = ['fr', 'it', 'de', 'es_MX', 'zh_CN', 'ja', 'ko', 'ar']
+install_built = find_program('scripts/install-built-file.sh')
+foreach loc : man_locales
+    man_loc = custom_target(
+        'hdmiosd-man-' + loc,
+        input: 'man' / loc / 'hdmiosd.adoc',
+        output: 'hdmiosd.' + loc + '.1',
+        command: man_asciidoctor_args + ['-o', '@OUTPUT@', '@INPUT@'],
+        build_by_default: true,
+    )
+    meson.add_install_script(
+        install_built,
+        man_loc,
+        mandir / loc / 'man1' / 'hdmiosd.1',
+    )
+endforeach
 
 subdir('po')
 
@@ -194,38 +215,24 @@ run_target(
 run_target(
     'install-symlinks',
     command: [
-        'bash',
-        '-euc', '''
-            prefix="@0@"
-            bindir="@1@"
-            datadir="@2@"
-            mandir="@3@"
-            mkdir -p "$bindir" "$datadir/bash-completion/completions" "$mandir/man1"
-            sudo ln -sfn "@BUILD_ROOT@/hdmiosd" "$bindir/hdmiosd"
-            sudo ln -sfn "@BUILD_ROOT@/hdmiosd.1" "$mandir/man1/hdmiosd.1"
-            sudo ln -sfn "@SOURCE_ROOT@/hdmiosd.bash" "$datadir/bash-completion/completions/hdmiosd"
-            printf "Symlinks installed under %s\n" "$prefix"
-        '''.format(get_option('prefix'), bindir, datadir, mandir),
+        find_program('bash'),
+        meson.project_source_root() / 'scripts' / 'install-symlinks.sh',
+        get_option('prefix'),
+        bindir,
+        datadir,
+        mandir,
+        meson.project_build_root(),
+        meson.project_source_root(),
     ],
 )
 
 run_target(
     'uninstall-symlinks',
     command: [
-        'bash',
-        '-euc', '''
-            for p in \
-                "@1@/hdmiosd" \
-                "@3@/man1/hdmiosd.1" \
-                "@2@/bash-completion/completions/hdmiosd"
-            do
-                if [ -L "$p" ]; then
-                    sudo rm -f "$p"
-                    printf "Removed %s\n" "$p"
-                else
-                    printf "Skipped (not a symlink): %s\n" "$p"
-                fi
-            done
-        '''.format(get_option('prefix'), bindir, datadir, mandir),
+        find_program('bash'),
+        meson.project_source_root() / 'scripts' / 'uninstall-symlinks.sh',
+        bindir,
+        datadir,
+        mandir,
     ],
 )

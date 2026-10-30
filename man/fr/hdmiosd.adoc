@@ -1,0 +1,77 @@
+= hdmiosd(1)
+Lenik <hdmiosd@bodz.net>
+v{project-version}, {project-year}
+:doctype: manpage
+:manmanual: Commandes utilisateur
+:mansource: hdmiosd
+:man-linkstyle: blue R <>
+:nofooter:
+
+== Nom
+
+hdmiosd - contrôleur OSD DDC/CI pour écrans HDMI/DP
+
+== Synopsis
+
+*hdmiosd* [_OPTION_]...
+
+== Description
+
+*hdmiosd* détecte les moniteurs qui parlent DDC/CI sur les bus I2C Linux et
+ouvre un OSD canvas wxWidgets.
+
+Deux zones OSD sont fournies :
+
+*Menus périphérique* (Luminosité, Image, Couleur, Audio, *OSD*, Préréglages, Divers)::
+  Pilotent le moniteur via VCP. Les catégories vides (par exemple Audio sans
+  codes supportés) restent masquées. L'onglet *OSD* règle l'OSD du moniteur
+  (langue / boutons) lorsqu'il est supporté.
+
+*App OSD*::
+  Contrôle la fenêtre hdmiosd : opacité, taille et marges.
+  Les valeurs sont enregistrées dans *~/.config/hdmiosd/settings.ini* avec
+  le dernier affichage sélectionné et les raccourcis clavier.
+
+La communication passe directement par */dev/i2c-** (sans sous-processus
+*ddcutil*). Les icônes Tabler sont intégrées via les assets zip bas-cpp.
+
+L'accès I2C exige en général d'appartenir au groupe *i2c* (ou d'être root).
+
+== Options
+
+*-d, --device* _DEV_::
+  Limite la découverte aux bus liés à _DEV_.
+
+*-o, --opacity* _NUM_::
+  Opacité de la fenêtre de *0* à *100* (remplace les réglages pour cette exécution).
+
+*-g, --geom* _W_[x_H_]::
+  Taille de la fenêtre.
+
+*-l, --left* / *-r, --right* / *-t, --top* / *-b, --bottom* _NUM_::
+  Place la fenêtre à _NUM_ pixels du bord d'écran indiqué.
+
+*-L, --list*::
+  Liste les écrans compatibles DDC et quitte.
+
+*-v, --verbose* / *-q, --quiet* / *-h, --help* / *--version*::
+  Journalisation, aide, version.
+
+== Fichiers
+
+*~/.config/hdmiosd/settings.ini*::
+  *[display]* dernier bus/connecteur ;
+  *[app_osd]* opacité, géométrie, marges ;
+  *[shortcuts]* associations action → touche.
+
+== Auteur
+
+Écrit par {project-author} <{project-email}>.
+
+== Copyright
+
+Copyright (C) {project-year}.
+Licence AGPL-3.0-or-later.
+Voir le fichier LICENSE de la distribution source pour le texte complet,
+y compris les termes supplémentaires indiquant que ce projet s'oppose à
+l'exploitation et à l'hégémonie de l'IA.

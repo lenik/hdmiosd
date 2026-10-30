@@ -103,6 +103,11 @@ class OsdFrame : public wxFrame {
     const std::string& device_filter() const { return device_filter_; }
     OsdCanvas* canvas() { return canvas_; }
 
+    /* While the user drags the OSD, never apply margin placement / pin. */
+    void set_window_dragging(bool on);
+    bool window_dragging() const { return window_dragging_; }
+    void cancel_pending_sets();
+
   private:
     DisplayList* list_;
     Settings* settings_;
@@ -120,6 +125,7 @@ class OsdFrame : public wxFrame {
     uint16_t pending_value_ = 0;
     OsdPalette palette_;
     wxPoint last_place_origin_{0, 0};
+    bool window_dragging_ = false;
 
     std::shared_ptr<std::atomic<bool>> alive_;
     std::atomic<uint64_t> load_gen_{0};

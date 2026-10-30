@@ -1,0 +1,77 @@
+= hdmiosd(1)
+Lenik <hdmiosd@bodz.net>
+v{project-version}, {project-year}
+:doctype: manpage
+:manmanual: Comandi utente
+:mansource: hdmiosd
+:man-linkstyle: blue R <>
+:nofooter:
+
+== Nome
+
+hdmiosd - controller OSD DDC/CI per display HDMI/DP
+
+== Synopsis
+
+*hdmiosd* [_OPTION_]...
+
+== Descrizione
+
+*hdmiosd* trova i monitor che parlano DDC/CI sui bus I2C Linux e apre un
+OSD canvas wxWidgets.
+
+Sono previste due aree OSD:
+
+*Menu dispositivo* (Luminosità, Immagine, Colore, Audio, *OSD*, Preset, Varie)::
+  Controllano il monitor via VCP. Le categorie vuote (ad es. Audio senza
+  codici supportati) restano nascoste. La scheda *OSD* regola l'OSD del
+  monitor (lingua / pulsanti) quando supportato.
+
+*App OSD*::
+  Controlla la finestra hdmiosd: opacità, dimensioni e margini.
+  I valori sono salvati in *~/.config/hdmiosd/settings.ini* insieme
+  all'ultimo display selezionato e alle scorciatoie.
+
+La comunicazione avviene direttamente su */dev/i2c-** (senza sottoprocesso
+*ddcutil*). Le icone Tabler sono incorporate tramite asset zip bas-cpp.
+
+L'accesso I2C di solito richiede l'appartenenza al gruppo *i2c* (o root).
+
+== Opzioni
+
+*-d, --device* _DEV_::
+  Limita l'individuazione ai bus relativi a _DEV_.
+
+*-o, --opacity* _NUM_::
+  Opacità della finestra da *0* a *100* (sovrascrive le impostazioni per questa esecuzione).
+
+*-g, --geom* _W_[x_H_]::
+  Dimensione della finestra.
+
+*-l, --left* / *-r, --right* / *-t, --top* / *-b, --bottom* _NUM_::
+  Posiziona la finestra a _NUM_ pixel dal bordo indicato.
+
+*-L, --list*::
+  Elenca i display DDC e termina.
+
+*-v, --verbose* / *-q, --quiet* / *-h, --help* / *--version*::
+  Log, aiuto, versione.
+
+== File
+
+*~/.config/hdmiosd/settings.ini*::
+  *[display]* ultimo bus/connettore;
+  *[app_osd]* opacità, geometria, margini;
+  *[shortcuts]* associazioni azione → tasto.
+
+== Autore
+
+Scritto da {project-author} <{project-email}>.
+
+== Copyright
+
+Copyright (C) {project-year}.
+Licenza AGPL-3.0-or-later.
+Vedere il file LICENSE nella distribuzione sorgente per il testo completo,
+inclusi i termini aggiuntivi che dichiarano l'opposizione del progetto allo
+sfruttamento e all'egemonia dell'IA.

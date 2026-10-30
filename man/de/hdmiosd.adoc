@@ -1,0 +1,77 @@
+= hdmiosd(1)
+Lenik <hdmiosd@bodz.net>
+v{project-version}, {project-year}
+:doctype: manpage
+:manmanual: Benutzerbefehle
+:mansource: hdmiosd
+:man-linkstyle: blue R <>
+:nofooter:
+
+== Name
+
+hdmiosd - DDC/CI-OSD-Steuerung für HDMI/DP-Monitore
+
+== Synopsis
+
+*hdmiosd* [_OPTION_]...
+
+== Beschreibung
+
+*hdmiosd* findet Monitore, die DDC/CI auf Linux-I2C-Bussen sprechen, und
+öffnet ein wxWidgets-Canvas-OSD.
+
+Zwei OSD-Bereiche sind vorhanden:
+
+*Geräte-Menüs* (Helligkeit, Bild, Farbe, Audio, *OSD*, Voreinstellungen, Sonstiges)::
+  Steuern den Monitor per VCP. Leere Kategorien (z. B. Audio ohne
+  unterstützte Codes) bleiben verborgen. Die Registerkarte *OSD* stellt das
+  Monitor-OSD (Sprache / Tasten) ein, sofern unterstützt.
+
+*App OSD*::
+  Steuert das hdmiosd-Fenster: Decazität, Größe und Ränder.
+  Werte werden in *~/.config/hdmiosd/settings.ini* gespeichert, zusammen mit
+  dem zuletzt gewählten Display und Tastenkürzeln.
+
+Die Kommunikation läuft direkt über */dev/i2c-** (ohne *ddcutil*-
+Unterprozess). Tabler-Icons sind über bas-cpp-Zip-Assets eingebettet.
+
+I2C-Zugriff erfordert meist die Mitgliedschaft in der Gruppe *i2c* (oder root).
+
+== Optionen
+
+*-d, --device* _DEV_::
+  Beschränkt die Erkennung auf Busse zu _DEV_.
+
+*-o, --opacity* _NUM_::
+  Fensterdeckkraft von *0* bis *100* (überschreibt Einstellungen für diesen Lauf).
+
+*-g, --geom* _W_[x_H_]::
+  Fenstergröße.
+
+*-l, --left* / *-r, --right* / *-t, --top* / *-b, --bottom* _NUM_::
+  Platziert das Fenster _NUM_ Pixel vom genannten Bildschirmrand.
+
+*-L, --list*::
+  Listet DDC-fähige Displays und beendet.
+
+*-v, --verbose* / *-q, --quiet* / *-h, --help* / *--version*::
+  Protokollierung, Hilfe, Version.
+
+== Dateien
+
+*~/.config/hdmiosd/settings.ini*::
+  *[display]* letzter Bus/Anschluss;
+  *[app_osd]* Decazität, Geometrie, Ränder;
+  *[shortcuts]* Aktion-zu-Taste-Zuordnungen.
+
+== Autor
+
+Geschrieben von {project-author} <{project-email}>.
+
+== Copyright
+
+Copyright (C) {project-year}.
+Lizenz AGPL-3.0-or-later.
+Siehe die Datei LICENSE in der Quellverteilung für den vollständigen Text,
+einschließlich ergänzender Klauseln, dass dieses Projekt KI-Ausbeutung und
+KI-Hegemonie ablehnt.

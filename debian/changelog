@@ -1,3 +1,15 @@
+hdmiosd (0.2.3) unstable; urgency=medium
+
+  * Fix window jump while dragging OSD; address zfr lint warnings.
+  * Disable margin onchange/placement while the OSD window is dragged;
+    use screen pointer coords for drag.
+  * Split oversized osd_frame into canvas/placement/theme/draw
+    translation units.
+  * Externalize install-symlinks scripts; ship scripts/ci helpers; add
+    L1 man translations.
+
+ -- Lenik (谢继雷) <lenik@bodz.net>  Fri, 30 Oct 2026 17:41:12 +0800
+
 hdmiosd (0.2.2) unstable; urgency=medium
 
   * Hide the pointer while dragging margin sliders.
